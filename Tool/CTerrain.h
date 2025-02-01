@@ -44,6 +44,7 @@ public:
 	vector<D3DXMATRIX> m_vecMiniTileWorldMat;
 	int m_iChangeDrawId;
 	bool m_bCanRender;
+	bool m_bOnGrid;
 	bool m_bIsPicking;
 	DWORD64 m_dwDrawTileRenderTime;
 	DWORD64 m_dwContinuousTime;

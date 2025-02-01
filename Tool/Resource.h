@@ -24,6 +24,7 @@
 #define IDC_SPIN3                       1016
 #define IDC_EDIT5                       1017
 #define IDC_TREE1                       1017
+#define IDC_CHECK1                      1021
 #define IDC_SPIN4                       1030
 #define IDC_EDIT6                       1031
 #define IDC_SPIN5                       1032
@@ -43,7 +44,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        325
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1021
+#define _APS_NEXT_CONTROL_VALUE         1022
 #define _APS_NEXT_SYMED_VALUE           314
 #endif
 #endif

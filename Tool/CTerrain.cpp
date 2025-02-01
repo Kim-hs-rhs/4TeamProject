@@ -7,9 +7,10 @@
 #include "CJsonManager.h"
 #include "CUndoManager.h"
 #include "CKeyManager.h"
+#include "CBSPMap.h"
 
 CTerrain::CTerrain() :
-	m_bCanRender(false), m_pLine(nullptr), m_bIsPicking(false), m_pMainView(nullptr), m_pMiniView(nullptr), m_iChangeDrawId(0), m_dwContinuousTime(0ULL),
+	m_bCanRender(false), m_bOnGrid(true), m_pLine(nullptr), m_bIsPicking(false), m_pMainView(nullptr), m_pMiniView(nullptr), m_iChangeDrawId(0), m_dwContinuousTime(0ULL),
 	m_dwDrawTileRenderTime(0ULL), vCameraOffset(D3DXVECTOR2(0.f, 0.f)), fCameraZoom(1.0f), m_LineIndex(0)
 {
 }
@@ -22,7 +23,7 @@ CTerrain::~CTerrain()
 void CTerrain::Initialize()
 {
 	D3DXCreateLine(CDevice::Get_Instance()->Get_Device(), &m_pLine);
-
+	m_bOnGrid = true;
 	//if (FAILED(CTextureMgr::Get_Instance()->Insert_Texture(
 	//	L"../Texture/Stage/Terrain/Tile/Act2/Tile_%d.png",
 	//	TEX_MULTI, L"Tile", L"Act2", 108)))
@@ -78,6 +79,11 @@ void CTerrain::Initialize()
 				});
 		}
 	}
+
+	//CBSPMap bspMap;
+
+	//bspMap.Generate_Room(TILECX, TILECY, 5);
+	//m_vecLine = bspMap.Get_Terrain_Grid();
 }
 
 void CTerrain::Update()
@@ -142,7 +148,10 @@ void CTerrain::Render()
 		iIndex++;
 	}
 
-	DrawDiamondGrid();
+	if (m_bOnGrid)
+	{
+		DrawDiamondGrid();
+	}	
 }
 
 void CTerrain::Release()
@@ -271,7 +280,7 @@ void CTerrain::Picking_Tile(const D3DXVECTOR3& mousePoint, bool bIsObjPick, bool
 				abs(pTile.vPos.y - tileCenter.y) < 0.1f)
 			{
 				tileExists = true;
-				if (!bIsObjPick)
+				if (!bIsObjPick&& m_stChangeFolderName!=L"")
 				{
 					pTile.byDrawID = m_iChangeDrawId;
 					pTile.wstrStateKey = m_stChangeFolderName;
@@ -412,7 +421,7 @@ void CTerrain::DrawDiamondGrid()
 
 	// Draw grid
 	m_pLine->Begin();
-
+	
 	for (auto& line : m_vecLine)
 	{
 		auto arrLine = line;
