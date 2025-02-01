@@ -30,6 +30,9 @@ void CMyForm::OnButtonObjectList()
 	if (nullptr == m_FindFolderTree.GetSafeHwnd())
 		m_FindFolderTree.Create(IDD_CFindFolderTree);	// 해당 id에 맞는 다이얼로그 생성
 
+	CMainFrame* pMainFrm = (CMainFrame*)AfxGetMainWnd();
+	CToolView* pView = dynamic_cast<CToolView*>(pMainFrm->m_ThirdSplitter.GetPane(0, 0));
+	pView->m_bIsTileMode = false;
 	m_FindFolderTree.RefreshTree(_T("../Texture/Human"));
 	m_FindFolderTree.ShowWindow(SW_SHOW);
 //	m_TextureListBox.Load_TextureListOfObjcet();
@@ -39,7 +42,8 @@ void CMyForm::OnButtonTileList()
 {
 	if (nullptr == m_FindFolderTree.GetSafeHwnd())
 		m_FindFolderTree.Create(IDD_CFindFolderTree);	// 해당 id에 맞는 다이얼로그 생성
-
+	CMainFrame* pMainFrm = (CMainFrame*)AfxGetMainWnd();
+	CToolView* pView = dynamic_cast<CToolView*>(pMainFrm->m_ThirdSplitter.GetPane(0, 0));
 	m_FindFolderTree.RefreshTree(_T("../Texture/Stage/Terrain"));
 	m_FindFolderTree.ShowWindow(SW_SHOW);
 }
@@ -86,6 +90,7 @@ void CMyForm::OnInitialUpdate()
 {
 	CFormView::OnInitialUpdate();
 	SetScrollSizes(MM_TEXT, CSize(0, 0)); // 스크롤 없애기
+	((CButton*)GetDlgItem(IDC_CHECK1))->SetCheck(1);
 	//m_TextureListBox.Load_TextureList();
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 }

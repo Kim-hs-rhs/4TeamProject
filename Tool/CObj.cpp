@@ -80,11 +80,42 @@ void CObj::Render()
 
 }
 
+void CObj::Mini_Render()
+{
+	D3DXMATRIX	matWorld, matScale, matTrans;
+	D3DXMatrixIdentity(&matWorld);
+	D3DXMatrixScaling(&matScale, 1.f, 1.f, 1.f);
+	D3DXMatrixTranslation(&matTrans,
+		m_tInfo.vPos.x,
+		m_tInfo.vPos.y,
+		m_tInfo.vPos.z);
+	matWorld = matScale * matTrans;
+	Set_Ratio(matWorld, 0.25f, 0.3f);
+	RECT	rc{};
+	GetClientRect(m_pMainView->m_hWnd, &rc);
+	float	fX = WINCX / float(rc.right - rc.left);
+	float	fY = WINCY / float(rc.bottom - rc.top);
+	float fScale = min(fX, fY);
+	Set_Ratio(matWorld, fScale, fScale);
+	CDevice::Get_Instance()->Get_Sprite()->SetTransform(&matWorld);
+	if (m_strObjKey == L"")
+		return;
+	const TEXINFO* pTexInfo = CTextureMgr::Get_Instance()->Get_Texture(m_strObjKey, m_strStateKey, (int)m_tFrame.fFrame);
+	float	fCenterX = pTexInfo->tImgInfo.Width / 2.f;
+	float	fCenterY = pTexInfo->tImgInfo.Height / 2.f;
+	D3DXVECTOR3	vTemp{ fCenterX, fCenterY, 0.f };
+	CDevice::Get_Instance()->Get_Sprite()->Draw(pTexInfo->pTexture, //출력할 텍스처 컴객체
+		nullptr,		// 출력할 이미지 영역에 대한 Rect 주소, null인 경우 이미지의 0, 0기준으로 출력
+		&vTemp,		// 출력할 이미지의 중심 좌표 vec3 주소, null인 경우 0, 0 이미지 중심
+		nullptr,		// 위치 좌표에 대한 vec3 주소, null인 경우 스크린 상 0, 0 좌표 출력	
+		D3DCOLOR_ARGB(255, 255, 255, 255)); // 출력할 이미지와 섞을 색상 값, 0xffffffff를 넘겨주면 섞지 않고 원본
+}
+
 void CObj::Release()
 {
 }
 
-void CObj::Picking_Obj()
+void CObj::Place_OnTile()
 {
 	if (!m_pTerrain||m_bIsSet)
 		return;
@@ -102,6 +133,44 @@ void CObj::Picking_Obj()
 
 	m_bIsSet = true;
 
+}
+
+bool CObj::Picking_Obj(const D3DXVECTOR3& mousePoint)
+{
+	if (m_strObjKey.empty())
+		return false;
+
+	const TEXINFO* pTexInfo = CTextureMgr::Get_Instance()->Get_Texture(
+		m_strObjKey.c_str(),
+		m_strStateKey.c_str(),
+		(int)m_tFrame.fFrame);
+
+	if (nullptr == pTexInfo)
+		return false;
+
+	float fHalfWidth = pTexInfo->tImgInfo.Width * 0.5f;
+	float fHalfHeight = pTexInfo->tImgInfo.Height * 0.5f;
+
+	D3DXVECTOR3 worldMousePos;
+	worldMousePos.x = mousePoint.x / fCameraZoom + vCameraOffset.x;
+	worldMousePos.y = mousePoint.y / fCameraZoom + vCameraOffset.y;
+	worldMousePos.z = 0.f;
+
+
+	float left = m_tInfo.vPos.x - fHalfWidth;
+	float right = m_tInfo.vPos.x + fHalfWidth;
+	float top = m_tInfo.vPos.y - fHalfHeight;
+	float bottom = m_tInfo.vPos.y + fHalfHeight;
+
+	// 충돌 체크
+	if (worldMousePos.x >= left && worldMousePos.x <= right &&
+		worldMousePos.y >= top && worldMousePos.y <= bottom)
+	{
+		m_bIsSet = false;
+		return true;  // 오브젝트가 선택됨
+	}
+
+	return false;
 }
 
 void CObj::Set_Position(const D3DXVECTOR3& _vMouse)

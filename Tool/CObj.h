@@ -57,8 +57,11 @@ public:
 	void		Initialize();
 	void		Update();
 	void		Render();
+	void Mini_Render();	
 	void		Release();
-	void		Picking_Obj();
+	void		Place_OnTile();
+
+	bool Picking_Obj(const D3DXVECTOR3& mousePoint);
 
 	void Set_Position(const D3DXVECTOR3& _vMouse);
 

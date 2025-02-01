@@ -7,6 +7,7 @@
 #include "MainFrm.h"
 #include "ToolView.h"
 #include "CTerrain.h"
+#include "CObjManager.h"
 
 
 // CMiniView
@@ -41,6 +42,7 @@ void CMiniView::OnDraw(CDC* pDC)
 	CDevice::Get_Instance()->Render_Begin();
 
 	pTerrain->Mini_Render();
+	CObjManager::Get_Instance()->Mini_Render();
 
 	CDevice::Get_Instance()->Render_End(m_hWnd);
 }

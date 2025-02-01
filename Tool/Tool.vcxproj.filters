@@ -82,6 +82,9 @@
     <Filter Include="03. Manager\05. ObjManager">
       <UniqueIdentifier>{543157d7-84d9-43e7-ada6-afd0aa7e1772}</UniqueIdentifier>
     </Filter>
+    <Filter Include="04. Etc\05. BSP Map">
+      <UniqueIdentifier>{3a1ffc77-4055-467a-8a9e-de17b8100c10}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Tool.h">
@@ -168,6 +171,9 @@
     <ClInclude Include="ConsoleWindow.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="CBSPMap.h">
+      <Filter>04. Etc\05. BSP Map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tool.cpp">
@@ -241,6 +247,9 @@
     </ClCompile>
     <ClCompile Include="ConsoleWindow.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CBSPMap.cpp">
+      <Filter>04. Etc\05. BSP Map</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

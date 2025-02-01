@@ -52,7 +52,7 @@ static int iCount = 0;
 CToolView::CToolView() noexcept
 	: m_pDevice(CDevice::Get_Instance()),
 	m_pTerrain(nullptr), m_nTimer(0), m_fSrollSpeed(0.f),
-	m_fAlpha(0.f), m_dwDisplayTime(0), m_pObj(nullptr), m_bIsObj(false)
+	m_fAlpha(0.f), m_dwDisplayTime(0), m_pObj(nullptr), m_bIsObj(false), m_bIsTileMode(false)
 	//, m_pSingle(nullptr)
 
 {
@@ -68,6 +68,7 @@ void CToolView::OnInitialUpdate()
 {
 	CView::OnInitialUpdate();
 	ConsoleWindow::Create();
+	srand((unsigned int)time(NULL));
 	m_nTimer = SetTimer(1, 16, NULL);
 	// AfxGetMainWnd : 현재 메인 윈도우의 값을 반환하는 전역함수
 
@@ -129,7 +130,6 @@ void CToolView::OnInitialUpdate()
 
 	if (!m_pObj)
 	{
-		iCount++;
 		m_pObj = new CObj;
 		m_pObj->Initialize();
 	}
@@ -143,24 +143,55 @@ void CToolView::OnLButtonDown(UINT nFlags, CPoint point)
 	CMyForm* pMyForm = dynamic_cast<CMyForm*>(pMainFrm->m_SecondSplitter.GetPane(1, 0));
 	if (nullptr != pMyForm)
 	{
-		if (0 == pMyForm->m_TextureListBox.GetCount())
+		if (0 == pMyForm->m_TextureListBox.GetCount() && CObjManager::Get_Instance()->m_vecObj.empty())
 			return;
 	}
 
 
-		m_pTerrain->Picking_Tile(D3DXVECTOR3((float)point.x, (float)point.y, 0.f),m_bIsObj,m_bIsTileMode);
+	m_pTerrain->Picking_Tile(D3DXVECTOR3((float)point.x, (float)point.y, 0.f), m_bIsObj, m_bIsTileMode);
 
 	//	CMainFrame* pMainFrm = dynamic_cast<CMainFrame*>(GetParentFrame());
 	CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMainFrm->m_SecondSplitter.GetPane(0, 0));
-	if (m_pObj && m_bIsObj)
+
+	if (!m_bIsTileMode)
 	{
-		CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
-		m_pObj->Picking_Obj();
-		CObjManager::Get_Instance()->Add_Obj(m_pObj);
-		m_pObj = new CObj;
-		m_pObj->Initialize();
-		iCount++;
-		m_bIsObj = false;
+
+		if (m_pObj && m_bIsObj)
+		{
+			CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
+			m_pObj->Place_OnTile();
+			CObjManager::Get_Instance()->Add_Obj(m_pObj);
+			m_pObj = new CObj;
+			m_pObj->Initialize();
+			iCount++;
+			m_bIsObj = false;
+		}
+		else // 기존 오브젝트 피킹
+		{
+			if (CObjManager::Get_Instance()->m_bIsPicking)
+			{
+				CObjManager::Get_Instance()->m_bIsPicking = false;
+				for (auto& pObj : CObjManager::Get_Instance()->m_vecObj)
+				{
+					if (!pObj->m_bIsSet)
+					{
+						pObj->Place_OnTile();
+						break;
+					}
+				}
+			}
+			else
+			{
+				for (auto& pObj : CObjManager::Get_Instance()->m_vecObj)
+				{
+					if (pObj->Picking_Obj(D3DXVECTOR3((float)point.x, (float)point.y, 0.f)))
+					{
+						CObjManager::Get_Instance()->m_bIsPicking = true;
+						break;
+					}
+				}
+			}
+		}
 	}
 	pMiniView->Invalidate(FALSE);
 }
@@ -398,7 +429,7 @@ void CToolView::OnMouseMove(UINT nFlags, CPoint point)
 				return;
 		}
 
-			m_pTerrain->Picking_Tile(D3DXVECTOR3((float)point.x, (float)point.y, 0.f),m_bIsObj,m_bIsTileMode);
+		m_pTerrain->Picking_Tile(D3DXVECTOR3((float)point.x, (float)point.y, 0.f), m_bIsObj, m_bIsTileMode);
 		//	CMainFrame* pMainFrm = dynamic_cast<CMainFrame*>(GetParentFrame());
 		CMiniView* pMiniView = dynamic_cast<CMiniView*>(pMainFrm->m_SecondSplitter.GetPane(0, 0));
 
@@ -409,7 +440,17 @@ void CToolView::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		m_pObj->Set_Position(D3DXVECTOR3((float)point.x, (float)point.y, 0.f));
 	}
-
+	else
+	{
+		for (auto& pObj : CObjManager::Get_Instance()->m_vecObj)
+		{
+			if (!pObj->m_bIsSet)
+			{
+				pObj->Set_Position(D3DXVECTOR3((float)point.x, (float)point.y, 0.f));
+				break;
+			}
+		}
+	}
 	CView::OnMouseMove(nFlags, point);
 }
 

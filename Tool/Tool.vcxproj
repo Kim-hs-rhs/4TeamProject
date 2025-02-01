@@ -188,6 +188,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CBSPMap.h" />
     <ClInclude Include="CDevice.h" />
     <ClInclude Include="CFileInfo.h" />
     <ClInclude Include="CFindFolderTree.h" />
@@ -218,6 +219,7 @@
     <ClInclude Include="ToolView.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CBSPMap.cpp" />
     <ClCompile Include="CDevice.cpp" />
     <ClCompile Include="CFileInfo.cpp" />
     <ClCompile Include="CFindFolderTree.cpp" />

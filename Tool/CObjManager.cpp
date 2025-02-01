@@ -30,6 +30,17 @@ void CObjManager::Render()
 	}
 }
 
+void CObjManager::Mini_Render()
+{
+	for (const auto& pObj : m_vecObj)
+	{
+		if (pObj)
+		{
+			pObj->Mini_Render();
+		}
+	}
+}
+
 void CObjManager::Release()
 {
 	for (auto& pObj : m_vecObj)
