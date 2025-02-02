@@ -66,7 +66,7 @@ private:
 	CUndoManager(){}
 	~CUndoManager() = default;
 private:
-	const size_t MAX_UNDO_SIZE = 40;
+	const size_t MAX_UNDO_SIZE = 60;
 	deque<EditorState> m_UndoStack;
 };
 

@@ -97,6 +97,7 @@ public:
 	CTerrain* m_pTerrain;
 
 	D3DXMATRIX m_matScale;
+	D3DXMATRIX m_matRot;
 	D3DXMATRIX m_matTrans;
 
 private:

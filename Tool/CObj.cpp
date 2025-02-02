@@ -22,6 +22,7 @@ void CObj::Initialize()
 	m_pTerrain = m_pMainView->m_pTerrain;
 	fCameraZoom = m_pTerrain->fCameraZoom;
 	vCameraOffset = m_pTerrain->vCameraOffset;
+	m_tInfo.vSize = { 1.f, 1.f, 1.f };
 	m_bIsSet = false;
 
 	D3DXMatrixIdentity(&m_tInfo.matWorld);
@@ -44,13 +45,15 @@ void CObj::Update()
 	}
 	}
 
-	D3DXMatrixScaling(&m_matScale, fCameraZoom, fCameraZoom, 1.f);
+	D3DXMatrixScaling(&m_matScale, fCameraZoom * m_tInfo.vSize.x, fCameraZoom* m_tInfo.vSize.y, m_tInfo.vSize.z);
+	D3DXMatrixRotationYawPitchRoll(&m_matRot, D3DXToRadian(m_tInfo.vRot.y), D3DXToRadian(m_tInfo.vRot.x), D3DXToRadian(m_tInfo.vRot.z));
+
 	D3DXMatrixTranslation(&m_matTrans,
 		(m_tInfo.vPos.x - vCameraOffset.x) * fCameraZoom,
 		(m_tInfo.vPos.y - vCameraOffset.y) * fCameraZoom,
 		m_tInfo.vPos.z);
 
-	m_tInfo.matWorld = m_matScale * m_matTrans;
+	m_tInfo.matWorld = m_matScale *m_matRot* m_matTrans;
 }
 
 void CObj::Render()
@@ -87,14 +90,15 @@ void CObj::Render()
 
 void CObj::Mini_Render()
 {
-	D3DXMATRIX	matWorld, matScale, matTrans;
+	D3DXMATRIX	matWorld, matScale,matRot, matTrans;
 	D3DXMatrixIdentity(&matWorld);
-	D3DXMatrixScaling(&matScale, 1.f, 1.f, 1.f);
+	D3DXMatrixScaling(&matScale,  m_tInfo.vSize.x, m_tInfo.vSize.y, m_tInfo.vSize.z);
+	D3DXMatrixRotationYawPitchRoll(&matRot, D3DXToRadian(m_tInfo.vRot.y), D3DXToRadian(m_tInfo.vRot.x), D3DXToRadian(m_tInfo.vRot.z));
 	D3DXMatrixTranslation(&matTrans,
 		m_tInfo.vPos.x,
 		m_tInfo.vPos.y,
 		m_tInfo.vPos.z);
-	matWorld = matScale * matTrans;
+	matWorld = matScale *matRot* matTrans;
 	Set_Ratio(matWorld, 0.25f, 0.3f);
 	RECT	rc{};
 	GetClientRect(m_pMainView->m_hWnd, &rc);
@@ -235,6 +239,8 @@ void CObj::Serialize(CArchive& ar)
 		}
 		ar << m_bIsSet;
 		ar << m_tInfo.vPos.x << m_tInfo.vPos.y << m_tInfo.vPos.z;	
+		ar << m_tInfo.vRot.x << m_tInfo.vRot.y << m_tInfo.vRot.z;
+		ar << m_tInfo.vSize.x << m_tInfo.vSize.y << m_tInfo.vSize.z;
 		ar << m_tFrame.fFrame << m_tFrame.fMax;
 	}
 	else // 불러올 때
@@ -259,6 +265,8 @@ void CObj::Serialize(CArchive& ar)
 		}
 		ar >> m_bIsSet;
 		ar >> m_tInfo.vPos.x >> m_tInfo.vPos.y >> m_tInfo.vPos.z;
+		ar >> m_tInfo.vRot.x >> m_tInfo.vRot.y >> m_tInfo.vRot.z;
+		ar >> m_tInfo.vSize.x >> m_tInfo.vSize.y >> m_tInfo.vSize.z;
 		ar >> m_tFrame.fFrame >> m_tFrame.fMax;
 	}
 }

@@ -4,6 +4,8 @@
 #include "pch.h"
 #include "Tool.h"
 #include "CTransformInfo.h"
+#include "CUndoManager.h"
+#include "CObjManager.h"
 
 
 // CTransformInfo
@@ -97,7 +99,6 @@ void CTransformInfo::OnInitialUpdate()
 			int scale = 10;
 			m_SpinCtrl[i].SetRange32(0, 800 * scale);  // 최소값 0, 최대값 100
 			m_SpinCtrl[i].SetPos32(0);  // 초기값 설정
-			m_bStart[i] = true;
 		}
 		
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
@@ -117,6 +118,7 @@ void CTransformInfo::OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult)
 		m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
 	}
 	
+	CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -128,14 +130,14 @@ void CTransformInfo::OnDeltaposSpin2(NMHDR* pNMHDR, LRESULT* pResult)
     if (!m_pObj) return;
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 	
-	// 스핀 버튼의 값이 변경될 때 호출되는 함수
-	m_vSpinValue[0].y = (float)(m_SpinCtrl[1].GetPos32());  // 현재 값을 가져옴
+ 
+    m_vSpinValue[0].y -= pNMUpDown->iDelta;
 
 	if (nullptr != m_pObj)
 	{
 		m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
 	}
-
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -154,7 +156,7 @@ void CTransformInfo::OnDeltaposSpin3(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
 	}
-
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -173,6 +175,7 @@ void CTransformInfo::OnDeltaposSpin4(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
 	}
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -190,6 +193,7 @@ void CTransformInfo::OnDeltaposSpin5(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
 	}
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -207,6 +211,7 @@ void CTransformInfo::OnDeltaposSpin6(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
 	}
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -224,6 +229,7 @@ void CTransformInfo::OnDeltaposSpin7(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
 	}
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -241,6 +247,7 @@ void CTransformInfo::OnDeltaposSpin8(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
 	}
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -258,6 +265,7 @@ void CTransformInfo::OnDeltaposSpin9(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
 	}
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -290,6 +298,7 @@ void CTransformInfo::OnEnChangeEdit3()  // Position X
     {
         m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
     }
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 }
 
 void CTransformInfo::OnEnChangeEdit4()  // Position Y
@@ -317,6 +326,7 @@ void CTransformInfo::OnEnChangeEdit4()  // Position Y
     {
         m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
     }
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 }
 
 void CTransformInfo::OnEnChangeEdit5()  // Position Z
@@ -344,6 +354,7 @@ void CTransformInfo::OnEnChangeEdit5()  // Position Z
     {
         m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
     }
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 }
 
 void CTransformInfo::OnEnChangeEdit6()  // Rotation X
@@ -371,6 +382,7 @@ void CTransformInfo::OnEnChangeEdit6()  // Rotation X
     {
         m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
     }
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 }
 
 void CTransformInfo::OnEnChangeEdit7()  // Rotation Y
@@ -398,6 +410,7 @@ void CTransformInfo::OnEnChangeEdit7()  // Rotation Y
     {
         m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
     }
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 }
 
 void CTransformInfo::OnEnChangeEdit8()  // Rotation Z
@@ -425,6 +438,7 @@ void CTransformInfo::OnEnChangeEdit8()  // Rotation Z
     {
         m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
     }
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 }
 
 void CTransformInfo::OnEnChangeEdit9()  // Scale X
@@ -452,6 +466,7 @@ void CTransformInfo::OnEnChangeEdit9()  // Scale X
     {
         m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
     }
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 }
 
 void CTransformInfo::OnEnChangeEdit10()  // Scale Y
@@ -479,6 +494,7 @@ void CTransformInfo::OnEnChangeEdit10()  // Scale Y
     {
         m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
     }
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 }
 
 void CTransformInfo::OnEnChangeEdit11()  // Scale Z
@@ -506,6 +522,7 @@ void CTransformInfo::OnEnChangeEdit11()  // Scale Z
     {
         m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
     }
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 }
 
 void CTransformInfo::Set_TransformSpin(const D3DXVECTOR3& vPos, const D3DXVECTOR3& vRot, const D3DXVECTOR3& vScale)

@@ -52,10 +52,10 @@ public:
 
 public:
 	void Set_TransformSpin(const D3DXVECTOR3& vPos, const D3DXVECTOR3& vRot, const D3DXVECTOR3& vScale);
-	void Get_SelectedObj(CObj* pObj) { m_pObj = pObj; }
+	void Set_SelectedObj(CObj* pObj) { m_pObj = pObj; }
+	CObj* Get_SelectedObj() { return m_pObj; }
 
 public:
-	bool m_bStart[9];
 	CSpinButtonCtrl m_SpinCtrl[9];
 	D3DXVECTOR3 m_vSpinValue[3];
 	CObj* m_pObj;

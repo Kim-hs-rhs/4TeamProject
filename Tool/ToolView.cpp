@@ -165,7 +165,7 @@ void CToolView::OnLButtonDown(UINT nFlags, CPoint point)
 			m_pObj->Place_OnTile();
 			CObjManager::Get_Instance()->Add_Obj(m_pObj);
 			
-			pTransformInfo->Get_SelectedObj(m_pObj);
+			pTransformInfo->Set_SelectedObj(m_pObj);
 			pTransformInfo->Set_TransformSpin(m_pObj->m_tInfo.vPos, m_pObj->m_tInfo.vRot, m_pObj->m_tInfo.vSize);
 
 			m_pObj = new CObj;
@@ -183,8 +183,8 @@ void CToolView::OnLButtonDown(UINT nFlags, CPoint point)
 					if (!pObj->m_bIsSet)
 					{
 						pObj->Place_OnTile();
-
-						pTransformInfo->Get_SelectedObj(pObj);
+						CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
+						pTransformInfo->Set_SelectedObj(pObj);
 						pTransformInfo->Set_TransformSpin(pObj->m_tInfo.vPos, pObj->m_tInfo.vRot, pObj->m_tInfo.vSize);
 
 						break;
@@ -199,7 +199,7 @@ void CToolView::OnLButtonDown(UINT nFlags, CPoint point)
 					{
 						CObjManager::Get_Instance()->m_bIsPicking = true;
 
-						pTransformInfo->Get_SelectedObj(pObj);
+						pTransformInfo->Set_SelectedObj(pObj);
 						//pTransformInfo->Set_TransformSpin(pObj->m_tInfo.vPos, pObj->m_tInfo.vRot, pObj->m_tInfo.vSize);
 						
 						break;
@@ -409,6 +409,14 @@ void CToolView::OnTimer(UINT_PTR nIDEvent)
 			if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) && (GetAsyncKeyState('Z') & 0x0001))
 			{
 				CUndoManager::Get_Instance()->Undo();
+				CMainFrame* pMainFrm = (CMainFrame*)AfxGetMainWnd();
+				CTransformInfo* pTransformInfo = dynamic_cast<CTransformInfo*>(pMainFrm->m_ThirdSplitter.GetPane(1, 0));
+
+				if (pTransformInfo)
+				{
+					pTransformInfo->Set_TransformSpin(D3DXVECTOR3(0.f, 0.f, 0.f), D3DXVECTOR3(0.f, 0.f, 0.f), D3DXVECTOR3(0.f, 0.f, 0.f));
+				}
+					
 
 			}
 			CObjManager::Get_Instance()->Update();
