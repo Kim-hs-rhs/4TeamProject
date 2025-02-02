@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "CBSPMap.h"
+#include "Include.h"
 
 const vector<array<D3DXVECTOR2, 5>> CBSPMap::Get_Terrain_Grid()
 {
@@ -47,19 +48,20 @@ void CBSPMap::Generate_Room(int iWidth, int iHeight, int iMinRoomSize)
     BSPNode* root = new BSPNode(0, 0, iWidth, iHeight);
     m_vecBSPNode.push_back(root);
 
-    RecursiveSplit(root, iMinRoomSize,4);
+    RecursiveSplit(root, iMinRoomSize);
     CreateRoom(root);
     Connect_Room(root);
-    Connect_Extra_Rooms();
+   // Connect_Extra_Rooms();
 }
 
 void CBSPMap::RecursiveSplit(BSPNode* pNode, int iMinRoomSize, int depth)
 {
     if (depth >= MAX_DEPTH ||
-        pNode->width < iMinRoomSize * 2 ||
-        pNode->height < iMinRoomSize * 2)
+        pNode->width < iMinRoomSize  ||
+        pNode->height < iMinRoomSize)
         return;
 
+    // 방의 깊이 설정
     pNode->depth = depth;
     SetDirection(pNode);
 
@@ -68,7 +70,8 @@ void CBSPMap::RecursiveSplit(BSPNode* pNode, int iMinRoomSize, int depth)
     if (pNode->direction == Direction::VERTICAL)
     {
         int split = (pNode->width * ratio) / 100;
-        if (split >= iMinRoomSize && (pNode->width - split) >= iMinRoomSize)
+       
+		if (split >= iMinRoomSize && (pNode->width - split) >= iMinRoomSize) // 최소 방 크기보다 크고, 나눠진 방도 최소 방 크기보다 크다면
         {
             pNode->left = new BSPNode(pNode->x, pNode->y, split, pNode->height);
             pNode->right = new BSPNode(pNode->x + split, pNode->y, pNode->width - split, pNode->height);
@@ -77,50 +80,60 @@ void CBSPMap::RecursiveSplit(BSPNode* pNode, int iMinRoomSize, int depth)
     else
     {
         int split = (pNode->height * ratio) / 100;
-        if (split >= iMinRoomSize && (pNode->height - split) >= iMinRoomSize)
+		if (split >= iMinRoomSize && (pNode->height - split) >= iMinRoomSize) // 최소 방 크기보다 크고, 나눠진 방도 최소 방 크기보다 크다면
         {
             pNode->left = new BSPNode(pNode->x, pNode->y, pNode->width, split);
             pNode->right = new BSPNode(pNode->x, pNode->y + split, pNode->width, pNode->height - split);
         }
     }
 
-    if (pNode->left && pNode->right)
+	if (pNode->left && pNode->right) // 왼쪽, 오른쪽 자식이 모두 있다면
     {
-        pNode->left->parent = pNode;
+        pNode->left->parent = pNode; 
         pNode->right->parent = pNode;
-        m_vecBSPNode.push_back(pNode->left);
+        m_vecBSPNode.push_back(pNode->left); 
         m_vecBSPNode.push_back(pNode->right);
-        RecursiveSplit(pNode->left, iMinRoomSize, depth + 1);
-        RecursiveSplit(pNode->right, iMinRoomSize, depth + 1);
+		RecursiveSplit(pNode->left, iMinRoomSize, depth + 1); // 왼쪽 자식으로 재귀 호출
+		RecursiveSplit(pNode->right, iMinRoomSize, depth + 1); // 오른쪽 자식으로 재귀 호출
     }
 }
 
 void CBSPMap::CreateRoom(BSPNode* pNode)
 {
-    if (pNode->left == nullptr && pNode->right == nullptr)
+	if (pNode->left == nullptr && pNode->right == nullptr) // 리프 노드라면
     {
         Room* pRoom = new Room;
-        int margin = min(pNode->width, pNode->height) / 4;
+		int margin = min(pNode->width, pNode->height) / 4; // 방의 여백 설정
 
-<<<<<<< Updated upstream
-        pRoom->x = pNode->x + margin;
-        pRoom->y = pNode->y + margin;
-        pRoom->width = max(3, pNode->width - (margin * 2));
-        pRoom->height = max(3, pNode->height - (margin * 2));
-=======
+
 		pRoom->x = pNode->x + margin; // 방의 x좌표 설정
 		pRoom->y = pNode->y + margin; // 방의 y좌표 설정
 		pRoom->width = max(4, pNode->width - (margin * 2)); // 방의 너비 설정
 		pRoom->height = max(4, pNode->height - (margin * 2)); // 방의 높이 설정
->>>>>>> Stashed changes
 
-        pNode->room = pRoom;
-        m_vecRoom.push_back(pRoom);
+
+		pNode->room = pRoom; // 노드에 방 설정
+		m_vecRoom.push_back(pRoom); // 방 벡터에 방 추가
     }
     else
     {
-        if (pNode->left) CreateRoom(pNode->left);
-        if (pNode->right) CreateRoom(pNode->right);
+		if (pNode->left) CreateRoom(pNode->left);   // 왼쪽 자식이 있다면 왼쪽 자식으로 재귀 호출
+		if (pNode->right) CreateRoom(pNode->right); // 오른쪽 자식이 있다면 오른쪽 자식으로 재귀 호출
+    }
+}
+
+void CBSPMap::Connect_Room(BSPNode* pNode)
+{
+    if (pNode->left && pNode->right) // 자식 노드가 있는 경우
+    {
+        // 왼쪽 자식의 방과 오른쪽 자식의 방을 연결
+        if (pNode->left->room && pNode->right->room)
+        {
+            CreateCorridor(pNode->left->room, pNode->right->room);
+        }
+
+        Connect_Room(pNode->left);   // 왼쪽 서브트리 처리
+        Connect_Room(pNode->right);  // 오른쪽 서브트리 처리
     }
 }
 
@@ -191,15 +204,15 @@ void CBSPMap::Connect_Extra_Rooms()
 
 void CBSPMap::CreateCorridor(Room* pLeft, Room* pRight)
 {
-    int x1 = pLeft->x + pLeft->width / 2;
-    int y1 = pLeft->y + pLeft->height / 2;
-    int x2 = pRight->x + pRight->width / 2;
-    int y2 = pRight->y + pRight->height / 2;
+	int x1 = pLeft->x + pLeft->width / 2; // 왼쪽 방의 중심 x좌표
+	int y1 = pLeft->y + pLeft->height / 2; // 왼쪽 방의 중심 y좌표
+	int x2 = pRight->x + pRight->width / 2; // 오른쪽 방의 중심 x좌표
+	int y2 = pRight->y + pRight->height / 2; // 오른쪽 방의 중심 y좌표
 
     Room* hCorridor = nullptr;
     Room* vCorridor = nullptr;
 
-    if (rand() % 2 == 0)
+	if (rand() % 2 == 0)    // 50% 확률로 수평 복도 생성
     {
         hCorridor = new Room{
             min(x1, x2),
@@ -215,14 +228,14 @@ void CBSPMap::CreateCorridor(Room* pLeft, Room* pRight)
             abs(y2 - y1) + CORRIDOR_WIDTH
         };
     }
-    else
-    {
-        vCorridor = new Room{
+	else // 50% 확률로 수직 복도 생성
+    {   
+        vCorridor = new Room{   
             x1 - CORRIDOR_WIDTH / 2,
             min(y1, y2),
             CORRIDOR_WIDTH,
             abs(y2 - y1) + CORRIDOR_WIDTH
-        };
+        };  
 
         hCorridor = new Room{
             min(x1, x2),
@@ -239,50 +252,9 @@ void CBSPMap::CreateCorridor(Room* pLeft, Room* pRight)
     ExtendCorridor(vCorridor);
 }
 
-bool CBSPMap::CanExtendCorridor(int x, int y)
-{
-    // 맵 경계 체크
-    if (x < 0 || y < 0)
-        return false;
-
-    // 다른 방이나 복도와 충돌 체크
-    for (const auto& room : m_vecRoom)
-    {
-        if (x >= room->x && x < room->x + room->width &&
-            y >= room->y && y < room->y + room->height)
-            return false;
-    }
-
-    return true;
-}
-
 void CBSPMap::ExtendCorridor(Room* pCorridor)
 {
-<<<<<<< Updated upstream
-    if (pCorridor->height == CORRIDOR_WIDTH)  // 수평 복도
-    {
-        while (CanExtendCorridor(pCorridor->x - 1, pCorridor->y))
-        {
-            pCorridor->x--;
-            pCorridor->width++;
-        }
-        while (CanExtendCorridor(pCorridor->x + pCorridor->width, pCorridor->y))
-        {
-            pCorridor->width++;
-        }
-    }
-    else if (pCorridor->width == CORRIDOR_WIDTH)  // 수직 복도
-    {
-        while (CanExtendCorridor(pCorridor->x, pCorridor->y - 1))
-        {
-            pCorridor->y--;
-            pCorridor->height++;
-        }
-        while (CanExtendCorridor(pCorridor->x, pCorridor->y + pCorridor->height))
-        {
-            pCorridor->height++;
-        }
-=======
+
     const int EXTENSION = 1;
 
     // 수평 복도인 경우
@@ -296,60 +268,6 @@ void CBSPMap::ExtendCorridor(Room* pCorridor)
     {
         pCorridor->y -= EXTENSION;
         pCorridor->height += EXTENSION * 2;  // 양쪽으로 확장
->>>>>>> Stashed changes
     }
-}
 
-void CBSPMap::Connect_Room(BSPNode* pNode)
-{
-    // 리프 노드가 아닌 경우에만 처리
-    if (pNode->left && pNode->right)
-    {
-        // 왼쪽 자식의 방과 오른쪽 자식의 방을 찾음
-        Room* pLeftRoom = nullptr;
-        Room* pRightRoom = nullptr;
-
-        // 왼쪽 자식에서 방 찾기
-        if (pNode->left->room)
-            pLeftRoom = pNode->left->room;
-        else if (pNode->left->left && pNode->left->right)
-            pLeftRoom = pNode->left->left->room ? pNode->left->left->room : pNode->left->right->room;
-
-        // 오른쪽 자식에서 방 찾기
-        if (pNode->right->room)
-            pRightRoom = pNode->right->room;
-        else if (pNode->right->left && pNode->right->right)
-            pRightRoom = pNode->right->left->room ? pNode->right->left->room : pNode->right->right->room;
-
-        // 두 방이 모두 존재하면 복도로 연결
-        if (pLeftRoom && pRightRoom)
-        {
-            CreateCorridor(pLeftRoom, pRightRoom);
-        }
-
-        // 재귀적으로 자식 노드들 처리
-        Connect_Room(pNode->left);
-        Connect_Room(pNode->right);
-    }
-}
-
-void CBSPMap::Connect_Extra_Rooms()
-{
-    const float DISTANCE_THRESHOLD = 10.0f;
-    const int CONNECTION_CHANCE = 30;  // 30% 확률
-
-    for (size_t i = 0; i < m_vecRoom.size(); ++i)
-    {
-        for (size_t j = i + 1; j < m_vecRoom.size(); ++j)
-        {
-            Room* r1 = m_vecRoom[i];
-            Room* r2 = m_vecRoom[j];
-
-            float dist = sqrt(pow(r1->x - r2->x, 2.0f) + pow(r1->y - r2->y, 2.0f));
-            if (dist < DISTANCE_THRESHOLD && (rand() % 100 < CONNECTION_CHANCE))
-            {
-                CreateCorridor(r1, r2);
-            }
-        }
-    }
 }
