@@ -2,7 +2,8 @@
 #include "pch.h"
 #include "CObj.h"
 
-CObj::CObj() : m_pTerrain(nullptr), m_AnimeTime(0), m_bIsSet(false), m_pMainView(nullptr), m_strStateKey(L""), m_strObjKey(L"")
+CObj::CObj() : m_pTerrain(nullptr), m_AnimeTime(0), m_bIsSet(false), m_pMainView(nullptr), m_strStateKey(L""), m_strObjKey(L""),
+m_fAngle(0.f), m_fScale(0.f)
 {
 	ZeroMemory(&m_tInfo, sizeof(INFO));
 	ZeroMemory(&m_tFrame, sizeof(FRAME));
@@ -21,13 +22,20 @@ void CObj::Initialize()
 	m_pTerrain = m_pMainView->m_pTerrain;
 	fCameraZoom = m_pTerrain->fCameraZoom;
 	vCameraOffset = m_pTerrain->vCameraOffset;
+	m_tInfo.vSize = { 1.f, 1.f, 1.f };
 	m_bIsSet = false;
+
+	D3DXMatrixIdentity(&m_tInfo.matWorld);
 }
 
 void CObj::Update()
 {
 	if (m_strObjKey == L"")
 		return;
+
+	if (m_strObjKey != L"Structure")
+	{
+
 	DWORD CurrentTime = GetTickCount();
 
 	if (CurrentTime - m_AnimeTime > 100)
@@ -35,22 +43,22 @@ void CObj::Update()
 		m_tFrame.fFrame = float((int)(m_tFrame.fFrame + 1.f) % (int)m_tFrame.fMax);
 		m_AnimeTime = CurrentTime;
 	}
+	}
+
+	D3DXMatrixScaling(&m_matScale, fCameraZoom * m_tInfo.vSize.x, fCameraZoom* m_tInfo.vSize.y, m_tInfo.vSize.z);
+	D3DXMatrixRotationYawPitchRoll(&m_matRot, D3DXToRadian(m_tInfo.vRot.y), D3DXToRadian(m_tInfo.vRot.x), D3DXToRadian(m_tInfo.vRot.z));
+
+	D3DXMatrixTranslation(&m_matTrans,
+		(m_tInfo.vPos.x - vCameraOffset.x) * fCameraZoom,
+		(m_tInfo.vPos.y - vCameraOffset.y) * fCameraZoom,
+		m_tInfo.vPos.z);
+
+	m_tInfo.matWorld = m_matScale *m_matRot* m_matTrans;
 }
 
 void CObj::Render()
 {
 	CDevice::Get_Instance()->Get_Sprite()->Begin(D3DXSPRITE_ALPHABLEND);
-
-	D3DXMATRIX	matWorld, matScale, matTrans;
-
-	D3DXMatrixIdentity(&matWorld);
-	D3DXMatrixScaling(&matScale, fCameraZoom, fCameraZoom, 1.f);
-	D3DXMatrixTranslation(&matTrans,
-		(m_tInfo.vPos.x - vCameraOffset.x) * fCameraZoom,
-		(m_tInfo.vPos.y - vCameraOffset.y) * fCameraZoom,
-		m_tInfo.vPos.z);
-
-	matWorld = matScale * matTrans;
 
 	RECT	rc{};
 
@@ -59,9 +67,9 @@ void CObj::Render()
 	float	fX = WINCX / float(rc.right - rc.left);
 	float	fY = WINCY / float(rc.bottom - rc.top);
 
-	Set_Ratio(matWorld, fX, fY);
+	Set_Ratio(m_tInfo.matWorld, fX, fY);
 
-	CDevice::Get_Instance()->Get_Sprite()->SetTransform(&matWorld);
+	CDevice::Get_Instance()->Get_Sprite()->SetTransform(&m_tInfo.matWorld);
 
 	const TEXINFO* pTexInfo = CTextureMgr::Get_Instance()->Get_Texture(m_strObjKey,m_strStateKey, (int)m_tFrame.fFrame);
 
@@ -82,14 +90,15 @@ void CObj::Render()
 
 void CObj::Mini_Render()
 {
-	D3DXMATRIX	matWorld, matScale, matTrans;
+	D3DXMATRIX	matWorld, matScale,matRot, matTrans;
 	D3DXMatrixIdentity(&matWorld);
-	D3DXMatrixScaling(&matScale, 1.f, 1.f, 1.f);
+	D3DXMatrixScaling(&matScale,  m_tInfo.vSize.x, m_tInfo.vSize.y, m_tInfo.vSize.z);
+	D3DXMatrixRotationYawPitchRoll(&matRot, D3DXToRadian(m_tInfo.vRot.y), D3DXToRadian(m_tInfo.vRot.x), D3DXToRadian(m_tInfo.vRot.z));
 	D3DXMatrixTranslation(&matTrans,
 		m_tInfo.vPos.x,
 		m_tInfo.vPos.y,
 		m_tInfo.vPos.z);
-	matWorld = matScale * matTrans;
+	matWorld = matScale *matRot* matTrans;
 	Set_Ratio(matWorld, 0.25f, 0.3f);
 	RECT	rc{};
 	GetClientRect(m_pMainView->m_hWnd, &rc);
@@ -167,6 +176,7 @@ bool CObj::Picking_Obj(const D3DXVECTOR3& mousePoint)
 		worldMousePos.y >= top && worldMousePos.y <= bottom)
 	{
 		m_bIsSet = false;
+
 		return true;  // 오브젝트가 선택됨
 	}
 
@@ -179,6 +189,7 @@ void CObj::Set_Position(const D3DXVECTOR3& _vMouse)
 	m_tInfo.vPos.x = _vMouse.x / fCameraZoom + vCameraOffset.x;
 	m_tInfo.vPos.y = _vMouse.y / fCameraZoom + vCameraOffset.y;
 }
+
 
 void CObj::Set_Ratio(D3DXMATRIX& pOut, float _fX, float _fY)
 {
@@ -201,6 +212,13 @@ void CObj::Set_Sprite(const wstring& strStateKey, const wstring& strObjKey, int 
 	m_tFrame.fFrame = 0.f;
 }
 
+void CObj::Set_WallSprite(const wstring& strStateKey, const wstring& strObjKey, int iIndex)
+{
+	m_strStateKey = strStateKey;
+	m_strObjKey = strObjKey;
+	m_tFrame.fFrame = iIndex;
+}
+
 void CObj::Serialize(CArchive& ar)
 {
 	if (ar.IsStoring()) // 저장할 때
@@ -221,6 +239,8 @@ void CObj::Serialize(CArchive& ar)
 		}
 		ar << m_bIsSet;
 		ar << m_tInfo.vPos.x << m_tInfo.vPos.y << m_tInfo.vPos.z;	
+		ar << m_tInfo.vRot.x << m_tInfo.vRot.y << m_tInfo.vRot.z;
+		ar << m_tInfo.vSize.x << m_tInfo.vSize.y << m_tInfo.vSize.z;
 		ar << m_tFrame.fFrame << m_tFrame.fMax;
 	}
 	else // 불러올 때
@@ -245,6 +265,8 @@ void CObj::Serialize(CArchive& ar)
 		}
 		ar >> m_bIsSet;
 		ar >> m_tInfo.vPos.x >> m_tInfo.vPos.y >> m_tInfo.vPos.z;
+		ar >> m_tInfo.vRot.x >> m_tInfo.vRot.y >> m_tInfo.vRot.z;
+		ar >> m_tInfo.vSize.x >> m_tInfo.vSize.y >> m_tInfo.vSize.z;
 		ar >> m_tFrame.fFrame >> m_tFrame.fMax;
 	}
 }

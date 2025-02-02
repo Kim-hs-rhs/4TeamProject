@@ -1,6 +1,4 @@
 #pragma once
-#include "Include.h"
-  
 
 class CBSPMap
 {
@@ -41,8 +39,6 @@ private:
     void Connect_Room(BSPNode* pNode);
     void CreateCorridor(Room* pLeft, Room* pRight);
     void ExtendCorridor(Room* pCorridor);
-    bool CanExtendCorridor(int x, int y);
-    void Connect_Extra_Rooms();
 
 private:
     vector<BSPNode*> m_vecBSPNode;

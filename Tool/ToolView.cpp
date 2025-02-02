@@ -26,6 +26,7 @@
 #include "CUndoManager.h"
 #include "CMyForm.h"
 #include "ConsoleWindow.h"
+#include "CTransformInfo.h"
 
 HWND	g_hWnd;
 
@@ -155,12 +156,18 @@ void CToolView::OnLButtonDown(UINT nFlags, CPoint point)
 
 	if (!m_bIsTileMode)
 	{
+		CMainFrame* pMainFrm = (CMainFrame*)AfxGetMainWnd();
+		CTransformInfo* pTransformInfo = dynamic_cast<CTransformInfo*>(pMainFrm->m_ThirdSplitter.GetPane(1, 0));
 
 		if (m_pObj && m_bIsObj)
 		{
 			CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 			m_pObj->Place_OnTile();
 			CObjManager::Get_Instance()->Add_Obj(m_pObj);
+			
+			pTransformInfo->Set_SelectedObj(m_pObj);
+			pTransformInfo->Set_TransformSpin(m_pObj->m_tInfo.vPos, m_pObj->m_tInfo.vRot, m_pObj->m_tInfo.vSize);
+
 			m_pObj = new CObj;
 			m_pObj->Initialize();
 			iCount++;
@@ -176,6 +183,10 @@ void CToolView::OnLButtonDown(UINT nFlags, CPoint point)
 					if (!pObj->m_bIsSet)
 					{
 						pObj->Place_OnTile();
+						CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
+						pTransformInfo->Set_SelectedObj(pObj);
+						pTransformInfo->Set_TransformSpin(pObj->m_tInfo.vPos, pObj->m_tInfo.vRot, pObj->m_tInfo.vSize);
+
 						break;
 					}
 				}
@@ -187,6 +198,10 @@ void CToolView::OnLButtonDown(UINT nFlags, CPoint point)
 					if (pObj->Picking_Obj(D3DXVECTOR3((float)point.x, (float)point.y, 0.f)))
 					{
 						CObjManager::Get_Instance()->m_bIsPicking = true;
+
+						pTransformInfo->Set_SelectedObj(pObj);
+						//pTransformInfo->Set_TransformSpin(pObj->m_tInfo.vPos, pObj->m_tInfo.vRot, pObj->m_tInfo.vSize);
+						
 						break;
 					}
 				}
@@ -352,7 +367,6 @@ void CToolView::OnTimer(UINT_PTR nIDEvent)
 		// 게임 로직 업데이트
 		if (m_pDevice)
 		{
-			cout << iCount << endl;
 			m_pTerrain->Update();
 			if (CKeyManager::Get_Instance()->Key_Pressing('A'))
 			{
@@ -395,6 +409,14 @@ void CToolView::OnTimer(UINT_PTR nIDEvent)
 			if ((GetAsyncKeyState(VK_CONTROL) & 0x8000) && (GetAsyncKeyState('Z') & 0x0001))
 			{
 				CUndoManager::Get_Instance()->Undo();
+				CMainFrame* pMainFrm = (CMainFrame*)AfxGetMainWnd();
+				CTransformInfo* pTransformInfo = dynamic_cast<CTransformInfo*>(pMainFrm->m_ThirdSplitter.GetPane(1, 0));
+
+				if (pTransformInfo)
+				{
+					pTransformInfo->Set_TransformSpin(D3DXVECTOR3(0.f, 0.f, 0.f), D3DXVECTOR3(0.f, 0.f, 0.f), D3DXVECTOR3(0.f, 0.f, 0.f));
+				}
+					
 
 			}
 			CObjManager::Get_Instance()->Update();

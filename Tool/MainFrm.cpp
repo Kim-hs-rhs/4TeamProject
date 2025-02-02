@@ -49,9 +49,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	HICON hIcon = AfxGetApp()->LoadIcon(IDI_ICON1);  // IDR_MAINFRAME는 새로 추가한 아이콘의 리소스 ID
-	SetIcon(hIcon, TRUE);  // 큰 아이콘 설정
-	SetIcon(hIcon, TRUE); // 작은 아이콘 설정
+	//HICON hIcon = AfxGetApp()->LoadIcon(IDI_ICON1);  // IDR_MAINFRAME는 새로 추가한 아이콘의 리소스 ID
+	//SetIcon(hIcon, TRUE);  // 큰 아이콘 설정
+	//SetIcon(hIcon, TRUE); // 작은 아이콘 설정
 
 	return 0;
 }
