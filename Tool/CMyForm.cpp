@@ -33,7 +33,7 @@ void CMyForm::OnButtonObjectList()
 	CMainFrame* pMainFrm = (CMainFrame*)AfxGetMainWnd();
 	CToolView* pView = dynamic_cast<CToolView*>(pMainFrm->m_ThirdSplitter.GetPane(0, 0));
 	pView->m_bIsTileMode = false;
-	m_FindFolderTree.RefreshTree(_T("../Texture/Human"));
+	m_FindFolderTree.RefreshTree(_T("../Texture/Object"));
 	m_FindFolderTree.ShowWindow(SW_SHOW);
 //	m_TextureListBox.Load_TextureListOfObjcet();
 }
@@ -124,6 +124,15 @@ void CMyForm::OnLbnSelchangeList1()
 			pTerrain->Change_DrawID(nIndex, m_TextureListBox.m_stFolderName);
 			pView->m_bIsTileMode = true;
 			}
+
+			else if(CurCategory == L"Structure")
+			{
+				pView->m_bIsTileMode = false;
+				pView->m_bIsObj = true;
+				CObj* pObj = pView->m_pObj;
+				pObj->Set_WallSprite(m_TextureListBox.m_stFolderName, m_TextureListBox.m_stCategory, nIndex);
+			}
+
 			else
 			{
 				pView->m_bIsTileMode = false;
@@ -131,7 +140,7 @@ void CMyForm::OnLbnSelchangeList1()
 				CObj* pObj = pView->m_pObj;
 				if (pObj)
 				{
-					pObj->Set_Sprite(m_TextureListBox.m_stFolderName,m_TextureListBox.m_stCategory, m_TextureListBox.GetCount());
+					pObj->Set_Sprite(m_TextureListBox.m_stFolderName, m_TextureListBox.m_stCategory, m_TextureListBox.GetCount());
 				}
 			}
 
