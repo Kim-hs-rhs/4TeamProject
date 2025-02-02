@@ -106,6 +106,7 @@ void CTransformInfo::OnInitialUpdate()
 
 void CTransformInfo::OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult)
 {
+    if (!m_pObj) return;
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
@@ -124,6 +125,7 @@ void CTransformInfo::OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTransformInfo::OnDeltaposSpin2(NMHDR* pNMHDR, LRESULT* pResult)
 {
+    if (!m_pObj) return;
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
@@ -142,6 +144,7 @@ void CTransformInfo::OnDeltaposSpin2(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTransformInfo::OnDeltaposSpin3(NMHDR* pNMHDR, LRESULT* pResult)
 {
+    if (!m_pObj) return;
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
@@ -160,6 +163,7 @@ void CTransformInfo::OnDeltaposSpin3(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTransformInfo::OnDeltaposSpin4(NMHDR* pNMHDR, LRESULT* pResult)
 {
+    if (!m_pObj) return;
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
@@ -177,6 +181,7 @@ void CTransformInfo::OnDeltaposSpin4(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTransformInfo::OnDeltaposSpin5(NMHDR* pNMHDR, LRESULT* pResult)
 {
+    if (!m_pObj) return;
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
@@ -193,6 +198,7 @@ void CTransformInfo::OnDeltaposSpin5(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTransformInfo::OnDeltaposSpin6(NMHDR* pNMHDR, LRESULT* pResult)
 {
+    if (!m_pObj) return;
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
@@ -209,6 +215,7 @@ void CTransformInfo::OnDeltaposSpin6(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTransformInfo::OnDeltaposSpin7(NMHDR* pNMHDR, LRESULT* pResult)
 {
+    if (!m_pObj) return;
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
@@ -225,6 +232,7 @@ void CTransformInfo::OnDeltaposSpin7(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTransformInfo::OnDeltaposSpin8(NMHDR* pNMHDR, LRESULT* pResult)
 {
+    if (!m_pObj) return;
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
@@ -241,6 +249,7 @@ void CTransformInfo::OnDeltaposSpin8(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTransformInfo::OnDeltaposSpin9(NMHDR* pNMHDR, LRESULT* pResult)
 {
+    if (!m_pObj) return;
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
@@ -255,100 +264,248 @@ void CTransformInfo::OnDeltaposSpin9(NMHDR* pNMHDR, LRESULT* pResult)
 }
 
 
-void CTransformInfo::OnEnChangeEdit3()
+void CTransformInfo::OnEnChangeEdit3()  // Position X
 {
-	// TODO:  RICHEDIT 컨트롤인 경우, 이 컨트롤은
-	// CFormView::OnInitDialog() 함수를 재지정 
-	//하고 마스크에 OR 연산하여 설정된 ENM_CHANGE 플래그를 지정하여 CRichEditCtrl().SetEventMask()를 호출하지 않으면
-	// 이 알림 메시지를 보내지 않습니다.
+    if (!m_pObj) return;
+    if (!UpdateData(TRUE))
+        return;
+
+    CString strValue;
+    GetDlgItem(IDC_EDIT3)->GetWindowText(strValue);
+
+    for (int i = 0; i < strValue.GetLength(); i++)
+    {
+        if (i == 0 && strValue[i] == '-') continue;
+        if (!isdigit(strValue[i]))
+        {
+            m_SpinCtrl[0].SetPos32((int)m_vSpinValue[0].x);
+            UpdateData(FALSE);
+            return;
+        }
+    }
+
+    m_SpinCtrl[0].SetPos32((int)m_vSpinValue[0].x);
+
+    if (nullptr != m_pObj)
+    {
+        m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
+    }
 }
 
-
-void CTransformInfo::OnEnChangeEdit4()
+void CTransformInfo::OnEnChangeEdit4()  // Position Y
 {
-	// TODO:  RICHEDIT 컨트롤인 경우, 이 컨트롤은
-	// CFormView::OnInitDialog() 함수를 재지정 
-	//하고 마스크에 OR 연산하여 설정된 ENM_CHANGE 플래그를 지정하여 CRichEditCtrl().SetEventMask()를 호출하지 않으면
-	// 이 알림 메시지를 보내지 않습니다.
+    if (!UpdateData(TRUE))
+        return;
 
-	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
+    CString strValue;
+    GetDlgItem(IDC_EDIT4)->GetWindowText(strValue);
+
+    for (int i = 0; i < strValue.GetLength(); i++)
+    {
+        if (i == 0 && strValue[i] == '-') continue;
+        if (!isdigit(strValue[i]))
+        {
+            m_SpinCtrl[1].SetPos32((int)m_vSpinValue[0].y);
+            UpdateData(FALSE);
+            return;
+        }
+    }
+
+    m_SpinCtrl[1].SetPos32((int)m_vSpinValue[0].y);
+
+    if (nullptr != m_pObj)
+    {
+        m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
+    }
 }
 
-
-void CTransformInfo::OnEnChangeEdit5()
+void CTransformInfo::OnEnChangeEdit5()  // Position Z
 {
-	// TODO:  RICHEDIT 컨트롤인 경우, 이 컨트롤은
-	// CFormView::OnInitDialog() 함수를 재지정 
-	//하고 마스크에 OR 연산하여 설정된 ENM_CHANGE 플래그를 지정하여 CRichEditCtrl().SetEventMask()를 호출하지 않으면
-	// 이 알림 메시지를 보내지 않습니다.
+    if (!UpdateData(TRUE))
+        return;
 
-	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
+    CString strValue;
+    GetDlgItem(IDC_EDIT5)->GetWindowText(strValue);
+
+    for (int i = 0; i < strValue.GetLength(); i++)
+    {
+        if (i == 0 && strValue[i] == '-') continue;
+        if (!isdigit(strValue[i]))
+        {
+            m_SpinCtrl[2].SetPos32((int)m_vSpinValue[0].z);
+            UpdateData(FALSE);
+            return;
+        }
+    }
+
+    m_SpinCtrl[2].SetPos32((int)m_vSpinValue[0].z);
+
+    if (nullptr != m_pObj)
+    {
+        m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
+    }
 }
 
-
-void CTransformInfo::OnEnChangeEdit6()
+void CTransformInfo::OnEnChangeEdit6()  // Rotation X
 {
-	// TODO:  RICHEDIT 컨트롤인 경우, 이 컨트롤은
-	// CFormView::OnInitDialog() 함수를 재지정 
-	//하고 마스크에 OR 연산하여 설정된 ENM_CHANGE 플래그를 지정하여 CRichEditCtrl().SetEventMask()를 호출하지 않으면
-	// 이 알림 메시지를 보내지 않습니다.
+    if (!UpdateData(TRUE))
+        return;
 
-	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
+    CString strValue;
+    GetDlgItem(IDC_EDIT6)->GetWindowText(strValue);
+
+    for (int i = 0; i < strValue.GetLength(); i++)
+    {
+        if (i == 0 && strValue[i] == '-') continue;
+        if (!isdigit(strValue[i]))
+        {
+            m_SpinCtrl[3].SetPos32((int)m_vSpinValue[1].x);
+            UpdateData(FALSE);
+            return;
+        }
+    }
+
+    m_SpinCtrl[3].SetPos32((int)m_vSpinValue[1].x);
+
+    if (nullptr != m_pObj)
+    {
+        m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
+    }
 }
 
-
-void CTransformInfo::OnEnChangeEdit7()
+void CTransformInfo::OnEnChangeEdit7()  // Rotation Y
 {
-	// TODO:  RICHEDIT 컨트롤인 경우, 이 컨트롤은
-	// CFormView::OnInitDialog() 함수를 재지정 
-	//하고 마스크에 OR 연산하여 설정된 ENM_CHANGE 플래그를 지정하여 CRichEditCtrl().SetEventMask()를 호출하지 않으면
-	// 이 알림 메시지를 보내지 않습니다.
+    if (!UpdateData(TRUE))
+        return;
 
-	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
+    CString strValue;
+    GetDlgItem(IDC_EDIT7)->GetWindowText(strValue);
+
+    for (int i = 0; i < strValue.GetLength(); i++)
+    {
+        if (i == 0 && strValue[i] == '-') continue;
+        if (!isdigit(strValue[i]))
+        {
+            m_SpinCtrl[4].SetPos32((int)m_vSpinValue[1].y);
+            UpdateData(FALSE);
+            return;
+        }
+    }
+
+    m_SpinCtrl[4].SetPos32((int)m_vSpinValue[1].y);
+
+    if (nullptr != m_pObj)
+    {
+        m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
+    }
 }
 
-
-void CTransformInfo::OnEnChangeEdit8()
+void CTransformInfo::OnEnChangeEdit8()  // Rotation Z
 {
-	// TODO:  RICHEDIT 컨트롤인 경우, 이 컨트롤은
-	// CFormView::OnInitDialog() 함수를 재지정 
-	//하고 마스크에 OR 연산하여 설정된 ENM_CHANGE 플래그를 지정하여 CRichEditCtrl().SetEventMask()를 호출하지 않으면
-	// 이 알림 메시지를 보내지 않습니다.
+    if (!UpdateData(TRUE))
+        return;
 
-	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
+    CString strValue;
+    GetDlgItem(IDC_EDIT8)->GetWindowText(strValue);
+
+    for (int i = 0; i < strValue.GetLength(); i++)
+    {
+        if (i == 0 && strValue[i] == '-') continue;
+        if (!isdigit(strValue[i]))
+        {
+            m_SpinCtrl[5].SetPos32((int)m_vSpinValue[1].z);
+            UpdateData(FALSE);
+            return;
+        }
+    }
+
+    m_SpinCtrl[5].SetPos32((int)m_vSpinValue[1].z);
+
+    if (nullptr != m_pObj)
+    {
+        m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
+    }
 }
 
-
-void CTransformInfo::OnEnChangeEdit9()
+void CTransformInfo::OnEnChangeEdit9()  // Scale X
 {
-	// TODO:  RICHEDIT 컨트롤인 경우, 이 컨트롤은
-	// CFormView::OnInitDialog() 함수를 재지정 
-	//하고 마스크에 OR 연산하여 설정된 ENM_CHANGE 플래그를 지정하여 CRichEditCtrl().SetEventMask()를 호출하지 않으면
-	// 이 알림 메시지를 보내지 않습니다.
+    if (!UpdateData(TRUE))
+        return;
 
-	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
+    CString strValue;
+    GetDlgItem(IDC_EDIT9)->GetWindowText(strValue);
+
+    for (int i = 0; i < strValue.GetLength(); i++)
+    {
+        if (i == 0 && strValue[i] == '-') continue;
+        if (!isdigit(strValue[i]))
+        {
+            m_SpinCtrl[6].SetPos32((int)m_vSpinValue[2].x);
+            UpdateData(FALSE);
+            return;
+        }
+    }
+
+    m_SpinCtrl[6].SetPos32((int)m_vSpinValue[2].x);
+
+    if (nullptr != m_pObj)
+    {
+        m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
+    }
 }
 
-
-void CTransformInfo::OnEnChangeEdit10()
+void CTransformInfo::OnEnChangeEdit10()  // Scale Y
 {
-	// TODO:  RICHEDIT 컨트롤인 경우, 이 컨트롤은
-	// CFormView::OnInitDialog() 함수를 재지정 
-	//하고 마스크에 OR 연산하여 설정된 ENM_CHANGE 플래그를 지정하여 CRichEditCtrl().SetEventMask()를 호출하지 않으면
-	// 이 알림 메시지를 보내지 않습니다.
+    if (!UpdateData(TRUE))
+        return;
 
-	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
+    CString strValue;
+    GetDlgItem(IDC_EDIT10)->GetWindowText(strValue);
+
+    for (int i = 0; i < strValue.GetLength(); i++)
+    {
+        if (i == 0 && strValue[i] == '-') continue;
+        if (!isdigit(strValue[i]))
+        {
+            m_SpinCtrl[7].SetPos32((int)m_vSpinValue[2].y);
+            UpdateData(FALSE);
+            return;
+        }
+    }
+
+    m_SpinCtrl[7].SetPos32((int)m_vSpinValue[2].y);
+
+    if (nullptr != m_pObj)
+    {
+        m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
+    }
 }
 
-
-void CTransformInfo::OnEnChangeEdit11()
+void CTransformInfo::OnEnChangeEdit11()  // Scale Z
 {
-	// TODO:  RICHEDIT 컨트롤인 경우, 이 컨트롤은
-	// CFormView::OnInitDialog() 함수를 재지정 
-	//하고 마스크에 OR 연산하여 설정된 ENM_CHANGE 플래그를 지정하여 CRichEditCtrl().SetEventMask()를 호출하지 않으면
-	// 이 알림 메시지를 보내지 않습니다.
+    if (!UpdateData(TRUE))
+        return;
 
-	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
+    CString strValue;
+    GetDlgItem(IDC_EDIT11)->GetWindowText(strValue);
+
+    for (int i = 0; i < strValue.GetLength(); i++)
+    {
+        if (i == 0 && strValue[i] == '-') continue;
+        if (!isdigit(strValue[i]))
+        {
+            m_SpinCtrl[8].SetPos32((int)m_vSpinValue[2].z);
+            UpdateData(FALSE);
+            return;
+        }
+    }
+
+    m_SpinCtrl[8].SetPos32((int)m_vSpinValue[2].z);
+
+    if (nullptr != m_pObj)
+    {
+        m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
+    }
 }
 
 void CTransformInfo::Set_TransformSpin(const D3DXVECTOR3& vPos, const D3DXVECTOR3& vRot, const D3DXVECTOR3& vScale)
