@@ -61,9 +61,13 @@ public:
 	void		Release();
 	void		Place_OnTile();
 
+	INFO Get_Info() { return m_tInfo; }
+	const D3DXVECTOR3& Get_WorldPos() { return (m_tInfo.vPos - (D3DXVECTOR3)vCameraOffset) * fCameraZoom; }
+
 	bool Picking_Obj(const D3DXVECTOR3& mousePoint);
 
 	void Set_Position(const D3DXVECTOR3& _vMouse);
+	void Set_Position_bySpin(float fX, float fY, float fZ = 0.f) { m_tInfo.vPos.x = fX; m_tInfo.vPos.y = fY; }
 
 	void Set_CameraOffsetX(float deltaX) { vCameraOffset.x += deltaX; }
 	void Set_CameraOffsetY(float deltaY) { vCameraOffset.y += deltaY; }
@@ -72,6 +76,7 @@ public:
 	void Set_Terrain(CTerrain* _Terrain) { m_pTerrain = _Terrain; }
 	void Set_Ratio(D3DXMATRIX& pOut, float _fX, float _fY);
 	void Set_Sprite(const wstring& strStateKey, const wstring& strObjKey,int iMaxFrame);
+	void Set_WallSprite(const wstring& strStateKey, const wstring& strObjKey, int iIndex);
 
 	void Serialize(CArchive& ar);
 public:
@@ -82,10 +87,16 @@ public:
 	D3DXVECTOR2 vCameraOffset;
 	CToolView* m_pMainView;
 	INFO	m_tInfo;
+	float	m_fAngle;
+	float	m_fScale;
 	FRAME   m_tFrame;
 	DWORD	m_AnimeTime;
 
 	CTerrain* m_pTerrain;
+
+	D3DXMATRIX m_matScale;
+	D3DXMATRIX m_matTrans;
+
 private:
 
 };
