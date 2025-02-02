@@ -166,7 +166,7 @@ void CToolView::OnLButtonDown(UINT nFlags, CPoint point)
 			CObjManager::Get_Instance()->Add_Obj(m_pObj);
 			
 			pTransformInfo->Get_SelectedObj(m_pObj);
-			pTransformInfo->Set_TransformSpin(m_pObj->Get_WorldPos(), m_pObj->Get_WorldPos(), m_pObj->Get_WorldPos());
+			pTransformInfo->Set_TransformSpin(m_pObj->m_tInfo.vPos, m_pObj->m_tInfo.vRot, m_pObj->m_tInfo.vSize);
 
 			m_pObj = new CObj;
 			m_pObj->Initialize();
@@ -185,7 +185,7 @@ void CToolView::OnLButtonDown(UINT nFlags, CPoint point)
 						pObj->Place_OnTile();
 
 						pTransformInfo->Get_SelectedObj(pObj);
-						pTransformInfo->Set_TransformSpin(pObj->Get_WorldPos(), pObj->Get_WorldPos(), pObj->Get_WorldPos());
+						pTransformInfo->Set_TransformSpin(pObj->m_tInfo.vPos, pObj->m_tInfo.vRot, pObj->m_tInfo.vSize);
 
 						break;
 					}
@@ -200,7 +200,7 @@ void CToolView::OnLButtonDown(UINT nFlags, CPoint point)
 						CObjManager::Get_Instance()->m_bIsPicking = true;
 
 						pTransformInfo->Get_SelectedObj(pObj);
-						pTransformInfo->Set_TransformSpin(pObj->Get_WorldPos(), pObj->Get_WorldPos(), pObj->Get_WorldPos());
+						//pTransformInfo->Set_TransformSpin(pObj->m_tInfo.vPos, pObj->m_tInfo.vRot, pObj->m_tInfo.vSize);
 						
 						break;
 					}

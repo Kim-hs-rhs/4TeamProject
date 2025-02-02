@@ -111,11 +111,9 @@ void CTransformInfo::OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult)
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
 	m_vSpinValue[0].x = (float)(m_SpinCtrl[0].GetPos32());  // 현재 값을 가져옴
 
-	float fX = m_vSpinValue[0].x / m_pObj->fCameraZoom + m_pObj->vCameraOffset.x;
-	float fY = 0.f;
 	if (nullptr != m_pObj)
 	{
-		m_pObj->Set_Position_bySpin(fX, fY);
+		m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
 	}
 	
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
@@ -131,12 +129,10 @@ void CTransformInfo::OnDeltaposSpin2(NMHDR* pNMHDR, LRESULT* pResult)
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
 	m_vSpinValue[0].y = (float)(m_SpinCtrl[1].GetPos32());  // 현재 값을 가져옴
 
-	/*float fX = m_vSpinValue[0].x / m_pObj->fCameraZoom + m_pObj->vCameraOffset.x;
-	float fY = 0.f;
 	if (nullptr != m_pObj)
 	{
-		m_pObj->Set_Position_bySpin(fX, fY);
-	}*/
+		m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
+	}
 
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
@@ -151,10 +147,10 @@ void CTransformInfo::OnDeltaposSpin3(NMHDR* pNMHDR, LRESULT* pResult)
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
 	m_vSpinValue[0].z = (float)(m_SpinCtrl[2].GetPos32());  // 현재 값을 가져옴
 
-	//if (nullptr != m_pObj)
-	//{
-	//	m_pObj->Set_Position_bySpin(m_vSpinValue[0]);
-	//}
+	if (nullptr != m_pObj)
+	{
+		m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
+	}
 
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
@@ -168,6 +164,11 @@ void CTransformInfo::OnDeltaposSpin4(NMHDR* pNMHDR, LRESULT* pResult)
 
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
 	m_vSpinValue[1].x = (float)(m_SpinCtrl[3].GetPos32());  // 현재 값을 가져옴
+
+	if (nullptr != m_pObj)
+	{
+		m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
+	}
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -180,6 +181,10 @@ void CTransformInfo::OnDeltaposSpin5(NMHDR* pNMHDR, LRESULT* pResult)
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
 	m_vSpinValue[1].y = (float)(m_SpinCtrl[4].GetPos32());  // 현재 값을 가져옴
+	if (nullptr != m_pObj)
+	{
+		m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
+	}
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -192,6 +197,10 @@ void CTransformInfo::OnDeltaposSpin6(NMHDR* pNMHDR, LRESULT* pResult)
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
 	m_vSpinValue[1].z = (float)(m_SpinCtrl[5].GetPos32());  // 현재 값을 가져옴
+	if (nullptr != m_pObj)
+	{
+		m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
+	}
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -204,6 +213,10 @@ void CTransformInfo::OnDeltaposSpin7(NMHDR* pNMHDR, LRESULT* pResult)
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
 	m_vSpinValue[2].x = (float)(m_SpinCtrl[6].GetPos32());  // 현재 값을 가져옴
+	if (nullptr != m_pObj)
+	{
+		m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
+	}
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -216,6 +229,10 @@ void CTransformInfo::OnDeltaposSpin8(NMHDR* pNMHDR, LRESULT* pResult)
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
 	m_vSpinValue[2].y = (float)(m_SpinCtrl[7].GetPos32());  // 현재 값을 가져옴
+	if (nullptr != m_pObj)
+	{
+		m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
+	}
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -228,6 +245,10 @@ void CTransformInfo::OnDeltaposSpin9(NMHDR* pNMHDR, LRESULT* pResult)
 	
 	// 스핀 버튼의 값이 변경될 때 호출되는 함수
 	m_vSpinValue[2].z = (float)(m_SpinCtrl[8].GetPos32());  // 현재 값을 가져옴
+	if (nullptr != m_pObj)
+	{
+		m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
+	}
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
 	*pResult = 0;
@@ -336,17 +357,17 @@ void CTransformInfo::Set_TransformSpin(const D3DXVECTOR3& vPos, const D3DXVECTOR
 	m_vSpinValue[1] = vRot;
 	m_vSpinValue[2] = vScale;
 
-	m_SpinCtrl[0].SetPos32(m_vSpinValue[0].x);
-	m_SpinCtrl[1].SetPos32(m_vSpinValue[0].y);
-	m_SpinCtrl[2].SetPos32(m_vSpinValue[0].z);
+	m_SpinCtrl[0].SetPos32((int)m_vSpinValue[0].x);
+	m_SpinCtrl[1].SetPos32((int)m_vSpinValue[0].y);
+	m_SpinCtrl[2].SetPos32((int)m_vSpinValue[0].z);
+	
+	m_SpinCtrl[3].SetPos32((int)m_vSpinValue[1].x);
+	m_SpinCtrl[4].SetPos32((int)m_vSpinValue[1].y);
+	m_SpinCtrl[5].SetPos32((int)m_vSpinValue[1].z);
 
-	m_SpinCtrl[3].SetPos32(m_vSpinValue[1].x);
-	m_SpinCtrl[4].SetPos32(m_vSpinValue[1].y);
-	m_SpinCtrl[5].SetPos32(m_vSpinValue[1].z);
-
-	m_SpinCtrl[6].SetPos32(m_vSpinValue[2].x);
-	m_SpinCtrl[7].SetPos32(m_vSpinValue[2].y);
-	m_SpinCtrl[8].SetPos32(m_vSpinValue[2].z);
+	m_SpinCtrl[6].SetPos32((int)m_vSpinValue[2].x);
+	m_SpinCtrl[7].SetPos32((int)m_vSpinValue[2].y);
+	m_SpinCtrl[8].SetPos32((int)m_vSpinValue[2].z);
 
 	UpdateData(false);
 }

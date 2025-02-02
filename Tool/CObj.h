@@ -62,12 +62,14 @@ public:
 	void		Place_OnTile();
 
 	INFO Get_Info() { return m_tInfo; }
-	const D3DXVECTOR3& Get_WorldPos() { return (m_tInfo.vPos - (D3DXVECTOR3)vCameraOffset) * fCameraZoom; }
+	D3DXVECTOR3 Get_WorldPos() { return D3DXVECTOR3(m_tInfo.vPos - (D3DXVECTOR3)vCameraOffset) * fCameraZoom; }
 
 	bool Picking_Obj(const D3DXVECTOR3& mousePoint);
 
 	void Set_Position(const D3DXVECTOR3& _vMouse);
-	void Set_Position_bySpin(float fX, float fY, float fZ = 0.f) { m_tInfo.vPos.x = fX; m_tInfo.vPos.y = fY; }
+	void Set_Position_bySpin(const D3DXVECTOR3& vPos) { m_tInfo.vPos = vPos;}
+	void Set_Rotation_bySpin(const D3DXVECTOR3& vRot) { m_tInfo.vRot = vRot; }
+	void Set_Scale_bySpin(const D3DXVECTOR3& vScale) { m_tInfo.vSize = vScale; }
 
 	void Set_CameraOffsetX(float deltaX) { vCameraOffset.x += deltaX; }
 	void Set_CameraOffsetY(float deltaY) { vCameraOffset.y += deltaY; }

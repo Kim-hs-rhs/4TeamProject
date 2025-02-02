@@ -29,14 +29,19 @@ void CObj::Initialize()
 
 void CObj::Update()
 {
-	if (m_strObjKey == L"Structure" || m_strObjKey == L"")
+	if (m_strObjKey == L"")
 		return;
+
+	if (m_strObjKey != L"Structure")
+	{
+
 	DWORD CurrentTime = GetTickCount();
 
 	if (CurrentTime - m_AnimeTime > 100)
 	{
 		m_tFrame.fFrame = float((int)(m_tFrame.fFrame + 1.f) % (int)m_tFrame.fMax);
 		m_AnimeTime = CurrentTime;
+	}
 	}
 
 	D3DXMatrixScaling(&m_matScale, fCameraZoom, fCameraZoom, 1.f);
