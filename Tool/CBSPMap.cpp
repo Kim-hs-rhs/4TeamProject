@@ -30,7 +30,6 @@ const vector<array<D3DXVECTOR2, 5>> CBSPMap::Get_Terrain_Grid()
 			}
 		}
 	}
-
 	return vecLines;
 }
 void CBSPMap::SetDirection(BSPNode* pNode)
@@ -103,10 +102,17 @@ void CBSPMap::CreateRoom(BSPNode* pNode)
         Room* pRoom = new Room;
         int margin = min(pNode->width, pNode->height) / 4;
 
+<<<<<<< Updated upstream
         pRoom->x = pNode->x + margin;
         pRoom->y = pNode->y + margin;
         pRoom->width = max(3, pNode->width - (margin * 2));
         pRoom->height = max(3, pNode->height - (margin * 2));
+=======
+		pRoom->x = pNode->x + margin; // 방의 x좌표 설정
+		pRoom->y = pNode->y + margin; // 방의 y좌표 설정
+		pRoom->width = max(4, pNode->width - (margin * 2)); // 방의 너비 설정
+		pRoom->height = max(4, pNode->height - (margin * 2)); // 방의 높이 설정
+>>>>>>> Stashed changes
 
         pNode->room = pRoom;
         m_vecRoom.push_back(pRoom);
@@ -115,6 +121,71 @@ void CBSPMap::CreateRoom(BSPNode* pNode)
     {
         if (pNode->left) CreateRoom(pNode->left);
         if (pNode->right) CreateRoom(pNode->right);
+    }
+}
+
+void CBSPMap::Connect_Extra_Rooms()
+{
+    vector<Room*> unconnected_rooms;
+
+    // 실제 방(복도가 아닌)만 추가
+    for (auto* room : m_vecRoom)
+    {
+        if (room->width > CORRIDOR_WIDTH && room->height > CORRIDOR_WIDTH)
+        {
+            unconnected_rooms.push_back(room);
+        }
+    }
+
+    // 모든 방이 연결될 때까지
+    while (!unconnected_rooms.empty())
+    {
+        size_t current_size = unconnected_rooms.size();
+
+        // 현재 선택된 방
+        Room* current_room = unconnected_rooms[0];
+        Room* nearest_room = nullptr;
+        float min_distance = FLT_MAX;
+
+        // 가장 가까운 다른 방 찾기
+        for (size_t i = 1; i < unconnected_rooms.size(); ++i)
+        {
+            Room* other_room = unconnected_rooms[i];
+
+            // 중심점 거리 계산
+            float x1 = current_room->x + current_room->width / 2.0f;
+            float y1 = current_room->y + current_room->height / 2.0f;
+            float x2 = other_room->x + other_room->width / 2.0f;
+            float y2 = other_room->y + other_room->height / 2.0f;
+
+            float distance = sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+
+            if (distance < min_distance)
+            {
+                min_distance = distance;
+                nearest_room = other_room;
+            }
+        }
+
+        // 가장 가까운 방과 연결
+        if (nearest_room)
+        {
+            CreateCorridor(current_room, nearest_room);
+
+            // 연결된 방들을 목록에서 제거
+            unconnected_rooms.erase(unconnected_rooms.begin());
+        }
+        else
+        {
+            // 더 이상 연결할 방이 없으면 현재 방 제거
+            unconnected_rooms.erase(unconnected_rooms.begin());
+        }
+
+        // 안전장치: 크기가 변하지 않으면 종료
+        if (current_size == unconnected_rooms.size())
+        {
+            break;
+        }
     }
 }
 
@@ -187,6 +258,7 @@ bool CBSPMap::CanExtendCorridor(int x, int y)
 
 void CBSPMap::ExtendCorridor(Room* pCorridor)
 {
+<<<<<<< Updated upstream
     if (pCorridor->height == CORRIDOR_WIDTH)  // 수평 복도
     {
         while (CanExtendCorridor(pCorridor->x - 1, pCorridor->y))
@@ -210,6 +282,21 @@ void CBSPMap::ExtendCorridor(Room* pCorridor)
         {
             pCorridor->height++;
         }
+=======
+    const int EXTENSION = 1;
+
+    // 수평 복도인 경우
+    if (pCorridor->width > pCorridor->height)
+    {
+        pCorridor->x -= EXTENSION;
+        pCorridor->width += EXTENSION * 2;  // 양쪽으로 확장
+    }
+    // 수직 복도인 경우
+    else
+    {
+        pCorridor->y -= EXTENSION;
+        pCorridor->height += EXTENSION * 2;  // 양쪽으로 확장
+>>>>>>> Stashed changes
     }
 }
 
