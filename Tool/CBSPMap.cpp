@@ -51,7 +51,7 @@ void CBSPMap::Generate_Room(int iWidth, int iHeight, int iMinRoomSize)
     RecursiveSplit(root, iMinRoomSize);
     CreateRoom(root);
     Connect_Room(root);
-   // Connect_Extra_Rooms();
+    Connect_Extra_Rooms();
 }
 
 void CBSPMap::RecursiveSplit(BSPNode* pNode, int iMinRoomSize, int depth)
@@ -108,8 +108,8 @@ void CBSPMap::CreateRoom(BSPNode* pNode)
 
 		pRoom->x = pNode->x + margin; // 방의 x좌표 설정
 		pRoom->y = pNode->y + margin; // 방의 y좌표 설정
-		pRoom->width = max(4, pNode->width - (margin * 2)); // 방의 너비 설정
-		pRoom->height = max(4, pNode->height - (margin * 2)); // 방의 높이 설정
+		pRoom->width = max(3, pNode->width - (margin * 2)); // 방의 너비 설정
+		pRoom->height = max(3, pNode->height - (margin * 2)); // 방의 높이 설정
 
 
 		pNode->room = pRoom; // 노드에 방 설정
