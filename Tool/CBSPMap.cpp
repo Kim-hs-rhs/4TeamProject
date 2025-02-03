@@ -161,7 +161,7 @@ void CBSPMap::Connect_Extra_Rooms()
         float min_distance = FLT_MAX;
 
         // 가장 가까운 다른 방 찾기
-        for (size_t i = 1; i < unconnected_rooms.size(); ++i)
+        for (size_t i = 1; i < unconnected_rooms.size(); i++)
         {
             Room* other_room = unconnected_rooms[i];
 

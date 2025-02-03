@@ -81,11 +81,11 @@ void CTerrain::Initialize()
 	}
 
 
-	CBSPMap bspMap;
-	int mapWidth = static_cast<int>(8000 / TILECX);
-	int mapHeight = static_cast<int>(6000 / TILECY);
-	bspMap.Generate_Room(mapWidth, mapHeight,2);
-	m_vecLine = bspMap.Get_Terrain_Grid();
+	//CBSPMap bspMap;
+	//int mapWidth = static_cast<int>(8000 / TILECX);
+	//int mapHeight = static_cast<int>(6000 / TILECY);
+	//bspMap.Generate_Room(mapWidth, mapHeight,2);
+	//m_vecLine = bspMap.Get_Terrain_Grid();
 }
 
 void CTerrain::Update()
