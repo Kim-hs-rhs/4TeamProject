@@ -159,7 +159,7 @@ void CTransformInfo::OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult)
                     obj->m_tInfo.vPos.x += pNMUpDown->iDelta;
                 }
             }
-
+            CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
             // UI에는 "-" 표시
             SetDlgItemText(IDC_EDIT3, L"-");
             *pResult = 0;
@@ -224,7 +224,7 @@ void CTransformInfo::OnDeltaposSpin2(NMHDR* pNMHDR, LRESULT* pResult)
                     obj->m_tInfo.vPos.y -= pNMUpDown->iDelta;
                 }
             }
-
+            CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
             // UI에는 "-" 표시
             SetDlgItemText(IDC_EDIT4, L"-");
             *pResult = 0;
@@ -289,6 +289,7 @@ void CTransformInfo::OnDeltaposSpin3(NMHDR* pNMHDR, LRESULT* pResult) // Positio
                     obj->m_tInfo.vPos.z += pNMUpDown->iDelta;
                 }
             }
+            CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
             SetDlgItemText(IDC_EDIT5, L"-");
             *pResult = 0;
             return;
@@ -350,6 +351,7 @@ void CTransformInfo::OnDeltaposSpin4(NMHDR* pNMHDR, LRESULT* pResult) // Rotatio
                     obj->m_tInfo.vRot.x += pNMUpDown->iDelta;
                 }
             }
+            CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
             SetDlgItemText(IDC_EDIT6, L"-");
             *pResult = 0;
             return;
@@ -411,6 +413,7 @@ void CTransformInfo::OnDeltaposSpin5(NMHDR* pNMHDR, LRESULT* pResult) // Rotatio
                     obj->m_tInfo.vRot.y += pNMUpDown->iDelta;
                 }
             }
+            CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
             SetDlgItemText(IDC_EDIT7, L"-");
             *pResult = 0;
             return;
@@ -472,6 +475,7 @@ void CTransformInfo::OnDeltaposSpin6(NMHDR* pNMHDR, LRESULT* pResult) // Rotatio
                     obj->m_tInfo.vRot.z += pNMUpDown->iDelta;
                 }
             }
+            CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
             SetDlgItemText(IDC_EDIT8, L"-");
             *pResult = 0;
             return;
@@ -534,6 +538,7 @@ void CTransformInfo::OnDeltaposSpin7(NMHDR* pNMHDR, LRESULT* pResult) // Scale X
                     obj->m_tInfo.vSize.x += pNMUpDown->iDelta;
                 }
             }
+            CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
             SetDlgItemText(IDC_EDIT9, L"-");
             *pResult = 0;
             return;
@@ -595,6 +600,7 @@ void CTransformInfo::OnDeltaposSpin8(NMHDR* pNMHDR, LRESULT* pResult) // Scale Y
                     obj->m_tInfo.vSize.y += pNMUpDown->iDelta;
                 }
             }
+            CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
             SetDlgItemText(IDC_EDIT10, L"-");
             *pResult = 0;
             return;
@@ -656,6 +662,7 @@ void CTransformInfo::OnDeltaposSpin9(NMHDR* pNMHDR, LRESULT* pResult) // Scale Z
                     obj->m_tInfo.vSize.z += pNMUpDown->iDelta;
                 }
             }
+            CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
             SetDlgItemText(IDC_EDIT11, L"-");
             *pResult = 0;
             return;
