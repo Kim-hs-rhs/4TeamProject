@@ -29,6 +29,7 @@ public:
 	void OnLButtonUp();
 
 	void Generate_Grid(int width, int height, int minRoomSize);
+	void Serialize(CArchive& ar);
 public:
 	wstring m_stTileFolderName;
 	wstring m_stChangeFolderName;

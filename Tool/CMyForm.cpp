@@ -337,7 +337,14 @@ void CMyForm::SaveMapData(vector<TILE>& vecTile, vector<CObj*>& vecObj, const CS
 		if (vecObj[i])
 			vecObj[i]->Serialize(Ar);
 	}
+	CMainFrame* pMainFrm = (CMainFrame*)AfxGetMainWnd();
+	CToolView* pView = dynamic_cast<CToolView*>(pMainFrm->m_ThirdSplitter.GetPane(0, 0));
 
+	CTerrain* pTerrain = pView->m_pTerrain;
+	if (pTerrain)
+	{
+		pTerrain->Serialize(Ar);
+	}
 	Ar.Close();
 	File.Close();
 
@@ -370,6 +377,7 @@ void CMyForm::LoadMapData(vector<TILE>& vecTile, vector<CObj*>& vecObj, const CS
 	// 현재 상태 저장 (실행 취소를 위해)
 	CUndoManager::Get_Instance()->SaveState(UndoType::TILE);
 	CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
+	CUndoManager::Get_Instance()->SaveState(UndoType::GRID);
 
 	// 타일 데이터 로드
 	int iTileCount = 0;
@@ -403,7 +411,14 @@ void CMyForm::LoadMapData(vector<TILE>& vecTile, vector<CObj*>& vecObj, const CS
 		pNewObj->Serialize(Ar);
 		vecObj.push_back(pNewObj);
 	}
+	CMainFrame* pMainFrm = (CMainFrame*)AfxGetMainWnd();
+	CToolView* pView = dynamic_cast<CToolView*>(pMainFrm->m_ThirdSplitter.GetPane(0, 0));
 
+	CTerrain* pTerrain = pView->m_pTerrain;
+	if (pTerrain)
+	{
+		pTerrain->Serialize(Ar);
+	}
 	Ar.Close();
 	File.Close();
 
@@ -499,6 +514,7 @@ void CMyForm::OnBnGridGenerate()
 
 	if (pTerrain)
 	{
+	CUndoManager::Get_Instance()->SaveState(UndoType::GRID);
 		pTerrain->Generate_Grid(m_arrGridAttri[0], m_arrGridAttri[1], m_arrGridAttri[2]);
 	}
 }

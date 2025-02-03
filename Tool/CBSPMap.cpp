@@ -11,9 +11,9 @@ const vector<array<D3DXVECTOR2, 5>> CBSPMap::Get_Terrain_Grid()
 	// 각 방과 복도에 대해 다이아몬드 형태의 라인 생성
 	for (const auto& pRoom : m_vecRoom)
 	{
-		for (int i = 0; i < pRoom->height; ++i)
+		for (int i = 0; i < pRoom->height; i++)
 		{
-			for (int j = 0; j < pRoom->width; ++j)
+			for (int j = 0; j < pRoom->width; j++)
 			{
                 int tileX = pRoom->x + j;
                 int tileY = pRoom->y + i;
@@ -23,8 +23,8 @@ const vector<array<D3DXVECTOR2, 5>> CBSPMap::Get_Terrain_Grid()
                     setLinesPos.insert({ tileX, tileY });
 
                     // 화면 좌표 계산
-                    float fY = (TILECY / 2.f) * (pRoom->y + i);
-                    float fX = (TILECX * (pRoom->x + j)) + ((pRoom->y + i) % 2) * (TILECX / 2.f);
+                    float fY = (TILECY / 2.f) * (tileY);
+                    float fX = (TILECX * (tileX)) + ((tileY) % 2) * (TILECX / 2.f);
                     float fCX = (TILECX / 2.f);
                     float fCY = (TILECY / 2.f);
 
@@ -37,10 +37,6 @@ const vector<array<D3DXVECTOR2, 5>> CBSPMap::Get_Terrain_Grid()
                         D3DXVECTOR2(fX, fY + fCY)
                     };
                     vecLines.push_back(line);
-                }
-                else
-                {
-                   // cout << "타일 중복 발견: (" << tileX << ", " << tileY << ")\n";
                 }
 			}
 		}

@@ -37,6 +37,19 @@ void CUndoManager::SaveState(const UndoType eUndoType)
 			}
 		}
 		break;
+	case UndoType::GRID:
+	{
+
+		CMainFrame* pMainFrm = (CMainFrame*)AfxGetMainWnd();
+		CToolView* pView = dynamic_cast<CToolView*>(pMainFrm->m_ThirdSplitter.GetPane(0, 0));
+
+		CTerrain* pTerrain = pView->m_pTerrain;
+		if (pTerrain)
+		{
+			state.vecGridInfo = pTerrain->m_vecLine;
+		}
+		break;
+	}
 	default:
 		return;
 
@@ -76,6 +89,7 @@ void CUndoManager::Undo()
 		break;
 	}
 	case UndoType::OBJ:
+	{
 		// 오브젝트 정보 복원 로직
 		auto* pObjManager = CObjManager::Get_Instance();
 		pObjManager->Release();
@@ -102,5 +116,18 @@ void CUndoManager::Undo()
 		}
 		break;
 	}
-	cout << "현재 Undo 스택의 크기 : " << m_UndoStack.size() << endl;
+	case UndoType::GRID:
+	{
+
+		CMainFrame* pMainFrm = (CMainFrame*)AfxGetMainWnd();
+		CToolView* pView = dynamic_cast<CToolView*>(pMainFrm->m_ThirdSplitter.GetPane(0, 0));
+
+		CTerrain* pTerrain = pView->m_pTerrain;
+		if (pTerrain)
+		{
+			pTerrain->m_vecLine = currentState.vecGridInfo;
+		}
+		break;
+	}
+	}
 }
