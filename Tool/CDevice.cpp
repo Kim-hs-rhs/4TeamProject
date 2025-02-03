@@ -97,7 +97,7 @@ void CDevice::Render_Begin()
 	m_pDevice->Clear(0,			// 렉트의 개수
 					nullptr,	// 여러 렉트 중 첫 번째 렉트의 주소
 					D3DCLEAR_STENCIL | D3DCLEAR_ZBUFFER | D3DCLEAR_TARGET, 
-					D3DCOLOR_ARGB(255, 0, 0, 255), // 후면 버퍼를 비우고서 채울 색상
+					D3DCOLOR_ARGB(255, 0, 0, 0), // 후면 버퍼를 비우고서 채울 색상
 					1.f,	// z버퍼 초기화 값
 					0);		// 스텐실 버퍼 초기화 값
 

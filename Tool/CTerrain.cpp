@@ -466,7 +466,7 @@ void CTerrain::DrawDiamondGrid()
 	int iTerm = 20;
 	//iTerm2 이 값을 조정해 줘야해(지금은 카메라 줌이 1인 상태기준이고 뒤쪽에 카메라 줌으로 연산해줘야함)
 	//카메라 줌이 1일때 기준 iTerm2 = 800 / 160 = 5 여서 한 행에 5개씩 그려짐
-	int iTerm2 = WINCX / TILECX;
+	int iTerm2 = 800 / TILECX;
 
 	//반복문1(아래쪽은 똑같은 형식의 반복문)
 	for (int i = 0; i < iTerm2; ++i)
@@ -512,10 +512,6 @@ void CTerrain::DrawDiamondGrid()
 
 	//반복문을 두 번 돌릴때마다 한 행씩 라인이 그려짐(한 번 돌릴때마다 절반씩만 나오더라)
 	//반복문 돌리는 횟수랑 iTerm2 값 연산식 조정하면 해결될듯
-
-
-
-
 
 	/*for (auto& line : m_vecLine)
 	{
