@@ -59,6 +59,8 @@ public:
 	CSpinButtonCtrl m_SpinCtrl[9];
 	D3DXVECTOR3 m_vSpinValue[3];
 	CObj* m_pObj;
+	vector<CObj*> m_vecSelectedObj;
+	bool m_bMultiSelected;
 };
 
 
