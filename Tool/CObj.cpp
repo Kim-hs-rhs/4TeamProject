@@ -98,8 +98,11 @@ void CObj::Mini_Render()
 		m_tInfo.vPos.x,
 		m_tInfo.vPos.y,
 		m_tInfo.vPos.z);
+
+
 	matWorld = matScale *matRot* matTrans;
-	Set_Ratio(matWorld, 0.25f, 0.3f);
+	Set_Ratio(matWorld, 0.15f, 0.15f);
+
 	RECT	rc{};
 	GetClientRect(m_pMainView->m_hWnd, &rc);
 	float	fX = WINCX / float(rc.right - rc.left);

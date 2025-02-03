@@ -8,6 +8,7 @@
 #include "ToolView.h"
 #include "CTerrain.h"
 #include "CUndoManager.h"
+#include "CFileInfo.h"
 
 
 // CMyForm
@@ -157,7 +158,25 @@ void CMyForm::OnBnClickedButton3()
 	CTerrain* pTerrain = pView->m_pTerrain;
 
 	//SaveTileData(pTerrain->m_vecTile, _T("../Data"), _T("tileDate.dat"));
-	SaveMapData(pTerrain->m_vecTile, CObjManager::Get_Instance()->m_vecObj, _T("../Data"), _T("mapData.dat"));
+	CFileDialog dig(FALSE, L"dat", L"*.dat", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		L"Data Files(*.dat) | *.dat ||", this);
+	CString strPath;
+	GetCurrentDirectory(256,strPath.GetBuffer(256));
+	strPath.ReleaseBuffer();
+	PathRemoveFileSpec(strPath.GetBuffer(256));
+	strPath.ReleaseBuffer();
+	strPath += L"\\Data";
+	dig.m_ofn.lpstrInitialDir = strPath;
+
+	if (IDOK == dig.DoModal())
+	{
+		CString strPath = dig.GetPathName();
+		CString strDirectory = strPath.Left(strPath.ReverseFind('\\'));
+		CString strFileName = strPath.Right(strPath.GetLength() - strPath.ReverseFind('\\') - 1);
+
+		CString strRelativeDir = CFileInfo::Convert_RelativePath(strDirectory);
+		SaveMapData(pTerrain->m_vecTile, CObjManager::Get_Instance()->m_vecObj, strRelativeDir, strFileName);
+	}
 }
 
 //Load 버튼
@@ -169,7 +188,27 @@ void CMyForm::OnBnClickedButton4()
 	CTerrain* pTerrain = pView->m_pTerrain;
 
 	//LoadTileData(pTerrain->m_vecTile, _T("../Data"), _T("tileDate.dat"));
-	LoadMapData(pTerrain->m_vecTile, CObjManager::Get_Instance()->m_vecObj, _T("../Data"), _T("mapData.dat"));
+
+	CFileDialog dig(TRUE, L"dat", L"*.dat", OFN_HIDEREADONLY | OFN_FILEMUSTEXIST,
+		L"Data Files(*.dat) | *.dat ||", this);
+	CString strPath;
+	GetCurrentDirectory(256, strPath.GetBuffer(256));
+	strPath.ReleaseBuffer();
+	PathRemoveFileSpec(strPath.GetBuffer(256));
+	strPath.ReleaseBuffer();
+	strPath += L"\\Data";
+	dig.m_ofn.lpstrInitialDir = strPath;
+
+	if (IDOK == dig.DoModal())
+	{
+		CString strPath = dig.GetPathName();
+		CString strDirectory = strPath.Left(strPath.ReverseFind('\\'));
+		CString strFileName = strPath.Right(strPath.GetLength() - strPath.ReverseFind('\\') - 1);
+
+		CString strRelativeDir = CFileInfo::Convert_RelativePath(strDirectory);
+
+		LoadMapData(pTerrain->m_vecTile, CObjManager::Get_Instance()->m_vecObj, strRelativeDir, strFileName);
+	}
 }
 
 void CMyForm::SaveTileData(vector<TILE>& vecTile, const CString& strFolderPath, const CString& strFileName)

@@ -80,10 +80,11 @@ void CTerrain::Initialize()
 		}
 	}
 
+
 	//CBSPMap bspMap;
-	//int mapWidth = static_cast<int>(800 / TILECX);
-	//int mapHeight = static_cast<int>(600 / TILECY);
-	//bspMap.Generate_Room(6, 8,3);
+	//int mapWidth = static_cast<int>(8000 / TILECX);
+	//int mapHeight = static_cast<int>(6000 / TILECY);
+	//bspMap.Generate_Room(mapWidth, mapHeight,2);
 	//m_vecLine = bspMap.Get_Terrain_Grid();
 }
 
@@ -189,7 +190,7 @@ void CTerrain::Mini_Render()
 
 		matWorld = matScale * matTrans;
 
-		Set_Ratio(matWorld, 0.25f, 0.3f);
+		Set_Ratio(matWorld, 0.15f, 0.15f);
 		RECT	rc{};
 		GetClientRect(m_pMainView->m_hWnd, &rc);
 
@@ -226,7 +227,7 @@ void CTerrain::Picking_Tile(const D3DXVECTOR3& mousePoint, bool bIsObjPick, bool
 	vNewMouse.y = mousePoint.y / fCameraZoom + vCameraOffset.y;
 
 	int pickedLineIndex = -1;
-	for (size_t i = 0; i < TILEX * TILEY; ++i)
+	for (size_t i = 0; i < m_vecLine.size(); ++i)
 	{
 		bool bInner = true;
 		D3DXVECTOR3 upPoint = { m_vecLine[i][0].x, m_vecLine[i][0].y, 0.f };
