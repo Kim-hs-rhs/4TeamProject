@@ -27,6 +27,9 @@ public:
 	auto& Get_CameraOffset() { return vCameraOffset; }	
 	auto& Get_ZoomLevel() { return fCameraZoom; }
 	void OnLButtonUp();
+
+	void Generate_Grid(int width, int height, int minRoomSize);
+	void Serialize(CArchive& ar);
 public:
 	wstring m_stTileFolderName;
 	wstring m_stChangeFolderName;

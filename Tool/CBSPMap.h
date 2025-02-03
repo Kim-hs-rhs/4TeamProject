@@ -57,7 +57,7 @@ private:
 private:
     vector<BSPNode*> m_vecBSPNode;
     vector<Room*> m_vecRoom;
-    const int MAX_DEPTH = 3;
-    const int CORRIDOR_WIDTH = 2;
+    const int MAX_DEPTH = 4;
+    const int CORRIDOR_WIDTH = 2;// 복도 크기
 };
 

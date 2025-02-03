@@ -108,10 +108,10 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 		WS_CHILD | WS_VISIBLE,
 		m_MainSplitter.IdFromRowCol(0, 1));
 
-	m_ThirdSplitter.CreateView(0, 0, RUNTIME_CLASS(CToolView), CSize(500, 300), pContext);
+	m_ThirdSplitter.CreateView(0, 0, RUNTIME_CLASS(CToolView), CSize(400, 300), pContext);
 	m_ThirdSplitter.CreateView(1, 0, RUNTIME_CLASS(CTransformInfo), CSize(500, 100), pContext);
 	m_MainSplitter.SetColumnInfo(0, 400, 10); // 1열에 (왼쪽 창) 300을 기본으로 10까지만 줄일 수 있게
-	m_ThirdSplitter.SetRowInfo(0, 600, 10);
+	m_ThirdSplitter.SetRowInfo(0, 580, 10);
 	m_ThirdSplitter.SetRowInfo(1, 100, 10);
 
 	return TRUE;

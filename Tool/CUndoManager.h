@@ -6,6 +6,7 @@ enum class UndoType
 {
 	TILE,
 	OBJ,
+	GRID,
 	END
 };
 struct EditorState
@@ -13,6 +14,7 @@ struct EditorState
 	UndoType eType;
 	vector<TILE> vecTileInfo;
 	vector<CObj*> vecObjInfo;
+	vector<array<D3DXVECTOR2, 5>> vecGridInfo; 
 
 	EditorState() : eType(UndoType::END) {}
 	~EditorState()
@@ -27,8 +29,9 @@ struct EditorState
     EditorState& operator=(const EditorState&) = delete;
     EditorState(EditorState&& other) noexcept
         : eType(other.eType)
-        , vecTileInfo(std::move(other.vecTileInfo))
-        , vecObjInfo(std::move(other.vecObjInfo))
+        , vecTileInfo(move(other.vecTileInfo))
+        , vecObjInfo(move(other.vecObjInfo))
+        ,vecGridInfo(move(other.vecGridInfo))
     {
         other.vecObjInfo.clear();  // 소유권 이전 후 원본은 비움
     }

@@ -28,6 +28,7 @@ public:
 #endif
 private:
 	CFont		m_Font;
+	int m_arrGridAttri[3];
 public:
 	CUnitTool	m_UnitTool;
 	void SaveTileData(vector<TILE>& vecTile, const CString& strFolderPath, const CString& strFileName);
@@ -50,6 +51,10 @@ public:
 	afx_msg void OnBnClickedButton4();
 	afx_msg void OnBnClickedButton3();
 	afx_msg void OnBnClickedCheck1();
+	afx_msg void OnSetWidth();
+	afx_msg void OnSetHeight();
+	afx_msg void OnBnGridGenerate();
+	afx_msg void OnSetMinRoomSize();
 };
 
 
