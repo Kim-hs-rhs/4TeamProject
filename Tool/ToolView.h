@@ -60,7 +60,14 @@ public:
 	DWORD m_dwDisplayTime;
 	bool m_bIsObj;
 	bool m_bIsTileMode;
-	//CSingleTexture* m_pSingle;
+	D3DXVECTOR2 m_vFirstMousePos;
+	D3DXVECTOR2 m_vSecondMousePos;
+	bool m_bDragging;
+	LPD3DXLINE m_DragLine;
+	DWORD m_dragStartTime;
+	DWORD m_dwDragEndTime;
+
+
 
 public:
 	virtual void OnInitialUpdate();
@@ -69,6 +76,10 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+public:
+	void Draw_Drag_Line();
+	void Select_In_Line_Obj();
+
 };
 
 #ifndef _DEBUG  // ToolView.cpp의 디버그 버전

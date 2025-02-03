@@ -79,19 +79,10 @@ void CTerrain::Initialize()
 				});
 		}
 	}
-
-
-	//CBSPMap bspMap;
-	//int mapWidth = static_cast<int>(8000 / TILECX);
-	//int mapHeight = static_cast<int>(6000 / TILECY);
-	//bspMap.Generate_Room(mapWidth, mapHeight,2);
-	//m_vecLine = bspMap.Get_Terrain_Grid();
 }
 
 void CTerrain::Update()
 {
-	
-
 }
 
 void CTerrain::Render()
@@ -324,6 +315,51 @@ void CTerrain::OnLButtonUp()
 	if (m_bIsPicking)
 	{
 		m_bIsPicking = false;
+	}
+}
+
+void CTerrain::Generate_Grid(int width, int height, int minRoomSize)
+{
+	CBSPMap bspMap;
+	int mapWidth = static_cast<int>(width / TILECX);
+	int mapHeight = static_cast<int>(height / TILECY);
+	bspMap.Generate_Room(mapWidth, mapHeight, minRoomSize);
+	m_vecLine = bspMap.Get_Terrain_Grid();
+}
+
+void CTerrain::Serialize(CArchive& ar)
+{
+	if (ar.IsStoring()) // 저장할 때
+	{
+		int iCount = (int)m_vecLine.size();
+		ar << iCount;
+		
+		for (int i = 0; i < iCount; i++)
+		{
+			auto& arr =  m_vecLine[i];
+			
+			for (int i = 0; i < (int)arr.size(); i++)
+			{
+				ar << arr[i].x << arr[i].y;
+			}
+		}
+	}
+	else // 불러올 때
+	{
+		int iCount = 0;
+		ar >> iCount;
+
+		m_vecLine.clear();
+		m_vecLine.resize(iCount);
+		for (int i = 0; i < iCount; i++)
+		{
+			auto& arr = m_vecLine[i];
+
+			for (int i = 0; i < (int)arr.size(); i++)
+			{
+				ar >> arr[i].x >> arr[i].y;
+			}
+		}
 	}
 }
 

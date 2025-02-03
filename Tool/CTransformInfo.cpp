@@ -13,7 +13,7 @@
 IMPLEMENT_DYNCREATE(CTransformInfo, CFormView)
 
 CTransformInfo::CTransformInfo()
-	: CFormView(IDD_CTransformInfo), m_pObj(nullptr)
+	: CFormView(IDD_CTransformInfo), m_pObj(nullptr), m_bMultiSelected(false)
 {
 	ZeroMemory(&m_vSpinValue, sizeof(D3DXVECTOR3) * 3);
 }
@@ -107,16 +107,65 @@ void CTransformInfo::OnInitialUpdate()
 
 void CTransformInfo::OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult)
 {
-    if (!m_pObj) return;
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 	
-	// 스핀 버튼의 값이 변경될 때 호출되는 함수
-	m_vSpinValue[0].x = (float)(m_SpinCtrl[0].GetPos32());  // 현재 값을 가져옴
+	
 
+    if (m_vecSelectedObj.empty())
+    {
 	if (nullptr != m_pObj)
-	{
+	{// 스핀 버튼의 값이 변경될 때 호출되는 함수
+        m_vSpinValue[0].x += pNMUpDown->iDelta; // 현재 값을 가져옴
 		m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
 	}
+    }
+    else
+    {
+        bool bSamePos = true;
+        float firstX = m_vecSelectedObj[0]->m_tInfo.vPos.x;
+
+        // 모든 객체가 같은 x좌표를 가지고 있는지 체크
+        for (size_t i = 1; i < m_vecSelectedObj.size(); ++i)
+        {
+            if (m_vecSelectedObj[i]->m_tInfo.vPos.x != firstX)
+            {
+                bSamePos = false;
+                break;
+            }
+        }
+
+        if (bSamePos)
+        {
+            if (m_vecSelectedObj.size() == (size_t)1)
+            {
+                Set_TransformSpin(m_vecSelectedObj.back()->m_tInfo.vPos, m_vecSelectedObj.back()->m_tInfo.vRot, m_vecSelectedObj.back()->m_tInfo.vSize);
+            }
+            m_vSpinValue[0].x += pNMUpDown->iDelta;
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vPos.x = m_vSpinValue[0].x;
+                }
+            }
+        }
+        else
+        {
+            // 위치가 다르면 상대적으로 이동
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vPos.x += pNMUpDown->iDelta;
+                }
+            }
+
+            // UI에는 "-" 표시
+            SetDlgItemText(IDC_EDIT3, L"-");
+            *pResult = 0;
+            return;
+        }
+    }
 	
 	CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
@@ -127,16 +176,62 @@ void CTransformInfo::OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTransformInfo::OnDeltaposSpin2(NMHDR* pNMHDR, LRESULT* pResult)
 {
-    if (!m_pObj) return;
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
-	
- 
-    m_vSpinValue[0].y -= pNMUpDown->iDelta;
+    if (m_vecSelectedObj.empty())
+    {
+        if (nullptr != m_pObj)
+        {// 스핀 버튼의 값이 변경될 때 호출되는 함수
+            m_vSpinValue[0].y -= pNMUpDown->iDelta;
+            m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
+        }
+    }
+    else
+    {
+        bool bSamePos = true;
+        float firstY = m_vecSelectedObj[0]->m_tInfo.vPos.y;
 
-	if (nullptr != m_pObj)
-	{
-		m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
-	}
+        for (size_t i = 1; i < m_vecSelectedObj.size(); ++i)
+        {
+            if (m_vecSelectedObj[i]->m_tInfo.vPos.y != firstY)
+            {
+                bSamePos = false;
+                break;
+            }
+        }
+
+        if (bSamePos)
+        {
+            if (m_vecSelectedObj.size() == (size_t)1)
+            {
+                Set_TransformSpin(m_vecSelectedObj.back()->m_tInfo.vPos, m_vecSelectedObj.back()->m_tInfo.vRot, m_vecSelectedObj.back()->m_tInfo.vSize);
+            }
+            m_vSpinValue[0].y -= pNMUpDown->iDelta;
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vPos.y -= pNMUpDown->iDelta;
+                }
+            }
+        }
+        else
+        {
+            // 위치가 다르면 상대적으로 이동
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vPos.y -= pNMUpDown->iDelta;
+                }
+            }
+
+            // UI에는 "-" 표시
+            SetDlgItemText(IDC_EDIT4, L"-");
+            *pResult = 0;
+            return;
+        }
+    }
+
     CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
 	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
 
@@ -144,142 +239,444 @@ void CTransformInfo::OnDeltaposSpin2(NMHDR* pNMHDR, LRESULT* pResult)
 }
 
 
-void CTransformInfo::OnDeltaposSpin3(NMHDR* pNMHDR, LRESULT* pResult)
+void CTransformInfo::OnDeltaposSpin3(NMHDR* pNMHDR, LRESULT* pResult) // Position Z
 {
-    if (!m_pObj) return;
-	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
-	
-	// 스핀 버튼의 값이 변경될 때 호출되는 함수
-	m_vSpinValue[0].z = (float)(m_SpinCtrl[2].GetPos32());  // 현재 값을 가져옴
+    LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 
-	if (nullptr != m_pObj)
-	{
-		m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
-	}
+    if (m_vecSelectedObj.empty())
+    {
+        if (nullptr != m_pObj)
+        {
+            m_vSpinValue[0].z += pNMUpDown->iDelta;
+            m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
+        }
+    }
+    else
+    {
+        bool bSamePos = true;
+        float firstZ = m_vecSelectedObj[0]->m_tInfo.vPos.z;
+
+        for (size_t i = 1; i < m_vecSelectedObj.size(); ++i)
+        {
+            if (m_vecSelectedObj[i]->m_tInfo.vPos.z != firstZ)
+            {
+                bSamePos = false;
+                break;
+            }
+        }
+
+        if (bSamePos)
+        {
+            if (m_vecSelectedObj.size() == (size_t)1)
+            {
+                Set_TransformSpin(m_vecSelectedObj.back()->m_tInfo.vPos, m_vecSelectedObj.back()->m_tInfo.vRot, m_vecSelectedObj.back()->m_tInfo.vSize);
+            }
+            m_vSpinValue[0].z += pNMUpDown->iDelta;
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vPos.z = m_vSpinValue[0].z;
+                }
+            }
+        }
+        else
+        {
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vPos.z += pNMUpDown->iDelta;
+                }
+            }
+            SetDlgItemText(IDC_EDIT5, L"-");
+            *pResult = 0;
+            return;
+        }
+    }
+
     CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
-	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
-
-	*pResult = 0;
+    UpdateData(FALSE);
+    *pResult = 0;
 }
 
-
-void CTransformInfo::OnDeltaposSpin4(NMHDR* pNMHDR, LRESULT* pResult)
+void CTransformInfo::OnDeltaposSpin4(NMHDR* pNMHDR, LRESULT* pResult) // Rotation X
 {
-    if (!m_pObj) return;
-	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+    LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 
-	// 스핀 버튼의 값이 변경될 때 호출되는 함수
-	m_vSpinValue[1].x = (float)(m_SpinCtrl[3].GetPos32());  // 현재 값을 가져옴
+    if (m_vecSelectedObj.empty())
+    {
+        if (nullptr != m_pObj)
+        {
+            m_vSpinValue[1].x += pNMUpDown->iDelta;
+            m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
+        }
+    }
+    else
+    {
+        bool bSameRot = true;
+        float firstRotX = m_vecSelectedObj[0]->m_tInfo.vRot.x;
 
-	if (nullptr != m_pObj)
-	{
-		m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
-	}
+        for (size_t i = 1; i < m_vecSelectedObj.size(); ++i)
+        {
+            if (m_vecSelectedObj[i]->m_tInfo.vRot.x != firstRotX)
+            {
+                bSameRot = false;
+                break;
+            }
+        }
+
+        if (bSameRot)
+        {
+            if (m_vecSelectedObj.size() == (size_t)1)
+            {
+                Set_TransformSpin(m_vecSelectedObj.back()->m_tInfo.vPos, m_vecSelectedObj.back()->m_tInfo.vRot, m_vecSelectedObj.back()->m_tInfo.vSize);
+            }
+            m_vSpinValue[1].x += pNMUpDown->iDelta;
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vRot.x += pNMUpDown->iDelta;
+                }
+            }
+        }
+        else
+        {
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vRot.x += pNMUpDown->iDelta;
+                }
+            }
+            SetDlgItemText(IDC_EDIT6, L"-");
+            *pResult = 0;
+            return;
+        }
+    }
+
     CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
-	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
-
-	*pResult = 0;
+    UpdateData(FALSE);
+    *pResult = 0;
 }
 
-
-void CTransformInfo::OnDeltaposSpin5(NMHDR* pNMHDR, LRESULT* pResult)
+void CTransformInfo::OnDeltaposSpin5(NMHDR* pNMHDR, LRESULT* pResult) // Rotation Y
 {
-    if (!m_pObj) return;
-	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
-	
-	// 스핀 버튼의 값이 변경될 때 호출되는 함수
-	m_vSpinValue[1].y = (float)(m_SpinCtrl[4].GetPos32());  // 현재 값을 가져옴
-	if (nullptr != m_pObj)
-	{
-		m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
-	}
-    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
-	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
+    LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 
-	*pResult = 0;
+    if (m_vecSelectedObj.empty())
+    {
+        if (nullptr != m_pObj)
+        {
+            m_vSpinValue[1].y += pNMUpDown->iDelta;
+            m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
+        }
+    }
+    else
+    {
+        bool bSameRot = true;
+        float firstRotY = m_vecSelectedObj[0]->m_tInfo.vRot.y;
+
+        for (size_t i = 1; i < m_vecSelectedObj.size(); ++i)
+        {
+            if (m_vecSelectedObj[i]->m_tInfo.vRot.y != firstRotY)
+            {
+                bSameRot = false;
+                break;
+            }
+        }
+
+        if (bSameRot)
+        {
+            if (m_vecSelectedObj.size() == (size_t)1)
+            {
+                Set_TransformSpin(m_vecSelectedObj.back()->m_tInfo.vPos, m_vecSelectedObj.back()->m_tInfo.vRot, m_vecSelectedObj.back()->m_tInfo.vSize);
+            }
+            m_vSpinValue[1].y += pNMUpDown->iDelta;
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vRot.y += pNMUpDown->iDelta;
+                }
+            }
+        }
+        else
+        {
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vRot.y += pNMUpDown->iDelta;
+                }
+            }
+            SetDlgItemText(IDC_EDIT7, L"-");
+            *pResult = 0;
+            return;
+        }
+    }
+
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
+    UpdateData(FALSE);
+    *pResult = 0;
 }
 
-
-void CTransformInfo::OnDeltaposSpin6(NMHDR* pNMHDR, LRESULT* pResult)
+void CTransformInfo::OnDeltaposSpin6(NMHDR* pNMHDR, LRESULT* pResult) // Rotation Z
 {
-    if (!m_pObj) return;
-	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
-	
-	// 스핀 버튼의 값이 변경될 때 호출되는 함수
-	m_vSpinValue[1].z = (float)(m_SpinCtrl[5].GetPos32());  // 현재 값을 가져옴
-	if (nullptr != m_pObj)
-	{
-		m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
-	}
-    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
-	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
+    LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 
-	*pResult = 0;
+    if (m_vecSelectedObj.empty())
+    {
+        if (nullptr != m_pObj)
+        {
+            m_vSpinValue[1].z += pNMUpDown->iDelta;
+            m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
+        }
+    }
+    else
+    {
+        bool bSameRot = true;
+        float firstRotZ = m_vecSelectedObj[0]->m_tInfo.vRot.z;
+
+        for (size_t i = 1; i < m_vecSelectedObj.size(); ++i)
+        {
+            if (m_vecSelectedObj[i]->m_tInfo.vRot.z != firstRotZ)
+            {
+                bSameRot = false;
+                break;
+            }
+        }
+
+        if (bSameRot)
+        {
+            if (m_vecSelectedObj.size() == (size_t)1)
+            {
+                Set_TransformSpin(m_vecSelectedObj.back()->m_tInfo.vPos, m_vecSelectedObj.back()->m_tInfo.vRot, m_vecSelectedObj.back()->m_tInfo.vSize);
+            }
+            m_vSpinValue[1].z += pNMUpDown->iDelta;
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vRot.z += pNMUpDown->iDelta;
+                }
+            }
+        }
+        else
+        {
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vRot.z += pNMUpDown->iDelta;
+                }
+            }
+            SetDlgItemText(IDC_EDIT8, L"-");
+            *pResult = 0;
+            return;
+        }
+    }
+
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
+    UpdateData(FALSE);
+    *pResult = 0;
 }
 
 
-void CTransformInfo::OnDeltaposSpin7(NMHDR* pNMHDR, LRESULT* pResult)
+void CTransformInfo::OnDeltaposSpin7(NMHDR* pNMHDR, LRESULT* pResult) // Scale X
 {
-    if (!m_pObj) return;
-	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
-	
-	// 스핀 버튼의 값이 변경될 때 호출되는 함수
-	m_vSpinValue[2].x = (float)(m_SpinCtrl[6].GetPos32());  // 현재 값을 가져옴
-	if (nullptr != m_pObj)
-	{
-		m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
-	}
-    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
-	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
+    LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 
-	*pResult = 0;
+    if (m_vecSelectedObj.empty())
+    {
+        if (nullptr != m_pObj)
+        {
+            m_vSpinValue[2].x += pNMUpDown->iDelta;
+            m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
+        }
+    }
+    else
+    {
+        bool bSameScale = true;
+        float firstScaleX = m_vecSelectedObj[0]->m_tInfo.vSize.x;
+
+        for (size_t i = 1; i < m_vecSelectedObj.size(); ++i)
+        {
+            if (m_vecSelectedObj[i]->m_tInfo.vSize.x != firstScaleX)
+            {
+                bSameScale = false;
+                break;
+            }
+        }
+
+        if (bSameScale)
+        {
+            if (m_vecSelectedObj.size() == (size_t)1)
+            {
+                Set_TransformSpin(m_vecSelectedObj.back()->m_tInfo.vPos, m_vecSelectedObj.back()->m_tInfo.vRot, m_vecSelectedObj.back()->m_tInfo.vSize);
+            }
+            m_vSpinValue[2].x += pNMUpDown->iDelta;
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vSize.x += pNMUpDown->iDelta;
+                }
+            }
+        }
+        else
+        {
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vSize.x += pNMUpDown->iDelta;
+                }
+            }
+            SetDlgItemText(IDC_EDIT9, L"-");
+            *pResult = 0;
+            return;
+        }
+    }
+
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
+    UpdateData(FALSE);
+    *pResult = 0;
 }
 
-
-void CTransformInfo::OnDeltaposSpin8(NMHDR* pNMHDR, LRESULT* pResult)
+void CTransformInfo::OnDeltaposSpin8(NMHDR* pNMHDR, LRESULT* pResult) // Scale Y
 {
-    if (!m_pObj) return;
-	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
-	
-	// 스핀 버튼의 값이 변경될 때 호출되는 함수
-	m_vSpinValue[2].y = (float)(m_SpinCtrl[7].GetPos32());  // 현재 값을 가져옴
-	if (nullptr != m_pObj)
-	{
-		m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
-	}
-    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
-	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
+    LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
 
-	*pResult = 0;
+    if (m_vecSelectedObj.empty())
+    {
+        if (nullptr != m_pObj)
+        {
+            m_vSpinValue[2].y += pNMUpDown->iDelta;
+            m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
+        }
+    }
+    else
+    {
+        bool bSameScale = true;
+        float firstScaleY = m_vecSelectedObj[0]->m_tInfo.vSize.y;
+
+        for (size_t i = 1; i < m_vecSelectedObj.size(); ++i)
+        {
+            if (m_vecSelectedObj[i]->m_tInfo.vSize.y != firstScaleY)
+            {
+                bSameScale = false;
+                break;
+            }
+        }
+
+        if (bSameScale)
+        {
+            if (m_vecSelectedObj.size() == (size_t)1)
+            {
+                Set_TransformSpin(m_vecSelectedObj.back()->m_tInfo.vPos, m_vecSelectedObj.back()->m_tInfo.vRot, m_vecSelectedObj.back()->m_tInfo.vSize);
+            }
+            m_vSpinValue[2].y += pNMUpDown->iDelta;
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vSize.y += pNMUpDown->iDelta;
+                }
+            }
+        }
+        else
+        {
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vSize.y += pNMUpDown->iDelta;
+                }
+            }
+            SetDlgItemText(IDC_EDIT10, L"-");
+            *pResult = 0;
+            return;
+        }
+    }
+
+    CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
+    UpdateData(FALSE);
+    *pResult = 0;
 }
 
-
-void CTransformInfo::OnDeltaposSpin9(NMHDR* pNMHDR, LRESULT* pResult)
+void CTransformInfo::OnDeltaposSpin9(NMHDR* pNMHDR, LRESULT* pResult) // Scale Z
 {
-    if (!m_pObj) return;
-	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
-	
-	// 스핀 버튼의 값이 변경될 때 호출되는 함수
-	m_vSpinValue[2].z = (float)(m_SpinCtrl[8].GetPos32());  // 현재 값을 가져옴
-	if (nullptr != m_pObj)
-	{
-		m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
-	}
+    LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+
+    if (m_vecSelectedObj.empty())
+    {
+        if (nullptr != m_pObj)
+        {
+            m_vSpinValue[2].z += pNMUpDown->iDelta;
+            m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
+        }
+    }
+    else
+    {
+        bool bSameScale = true;
+        float firstScaleZ = m_vecSelectedObj[0]->m_tInfo.vSize.z;
+
+        for (size_t i = 1; i < m_vecSelectedObj.size(); ++i)
+        {
+            if (m_vecSelectedObj[i]->m_tInfo.vSize.z != firstScaleZ)
+            {
+                bSameScale = false;
+                break;
+            }
+        }
+
+        if (bSameScale)
+        {
+            if (m_vecSelectedObj.size() == (size_t)1)
+            {
+                Set_TransformSpin(m_vecSelectedObj.back()->m_tInfo.vPos, m_vecSelectedObj.back()->m_tInfo.vRot, m_vecSelectedObj.back()->m_tInfo.vSize);
+            }
+            m_vSpinValue[2].z += pNMUpDown->iDelta;
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vSize.z += pNMUpDown->iDelta;
+                }
+            }
+        }
+        else
+        {
+            for (auto& obj : m_vecSelectedObj)
+            {
+                if (obj)
+                {
+                    obj->m_tInfo.vSize.z += pNMUpDown->iDelta;
+                }
+            }
+            SetDlgItemText(IDC_EDIT11, L"-");
+            *pResult = 0;
+            return;
+        }
+    }
+
     CUndoManager::Get_Instance()->SaveState(UndoType::OBJ);
-	UpdateData(FALSE);  // 컨트롤의 값을 변수에 업데이트
-
-	*pResult = 0;
+    UpdateData(FALSE);
+    *pResult = 0;
 }
-
 
 void CTransformInfo::OnEnChangeEdit3()  // Position X
 {
-    if (!m_pObj) return;
-    if (!UpdateData(TRUE))
-        return;
-
     CString strValue;
     GetDlgItem(IDC_EDIT3)->GetWindowText(strValue);
+    if (!m_vecSelectedObj.empty() && strValue == "-")
+        return;
+    if (!UpdateData(TRUE))
+        return;
+    if (!m_pObj && m_vecSelectedObj.empty())
+        return;
 
     for (int i = 0; i < strValue.GetLength(); i++)
     {
@@ -293,8 +690,17 @@ void CTransformInfo::OnEnChangeEdit3()  // Position X
     }
 
     m_SpinCtrl[0].SetPos32((int)m_vSpinValue[0].x);
-
-    if (nullptr != m_pObj)
+    if (!m_vecSelectedObj.empty())
+    {
+        for (auto& obj : m_vecSelectedObj)
+        {
+            if (obj)
+            {
+                obj->m_tInfo.vPos.x = m_vSpinValue[0].x;
+            }
+        }
+    }
+    else if (nullptr != m_pObj)
     {
         m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
     }
@@ -303,11 +709,14 @@ void CTransformInfo::OnEnChangeEdit3()  // Position X
 
 void CTransformInfo::OnEnChangeEdit4()  // Position Y
 {
-    if (!UpdateData(TRUE))
-        return;
-
     CString strValue;
     GetDlgItem(IDC_EDIT4)->GetWindowText(strValue);
+    if (!m_vecSelectedObj.empty() && strValue == "-")
+        return;
+    if (!UpdateData(TRUE))
+        return;
+    if (!m_pObj && m_vecSelectedObj.empty())
+        return;
 
     for (int i = 0; i < strValue.GetLength(); i++)
     {
@@ -322,7 +731,17 @@ void CTransformInfo::OnEnChangeEdit4()  // Position Y
 
     m_SpinCtrl[1].SetPos32((int)m_vSpinValue[0].y);
 
-    if (nullptr != m_pObj)
+    if (!m_vecSelectedObj.empty())
+    {
+        for (auto& obj : m_vecSelectedObj)
+        {
+            if (obj)
+            {
+                obj->m_tInfo.vPos.y = m_vSpinValue[0].y;
+            }
+        }
+    }
+    else if (nullptr != m_pObj)
     {
         m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
     }
@@ -331,11 +750,14 @@ void CTransformInfo::OnEnChangeEdit4()  // Position Y
 
 void CTransformInfo::OnEnChangeEdit5()  // Position Z
 {
-    if (!UpdateData(TRUE))
-        return;
-
     CString strValue;
     GetDlgItem(IDC_EDIT5)->GetWindowText(strValue);
+    if (!m_vecSelectedObj.empty() && strValue == "-")
+        return;
+    if (!UpdateData(TRUE))
+        return;
+    if (!m_pObj && m_vecSelectedObj.empty())
+        return;
 
     for (int i = 0; i < strValue.GetLength(); i++)
     {
@@ -350,7 +772,17 @@ void CTransformInfo::OnEnChangeEdit5()  // Position Z
 
     m_SpinCtrl[2].SetPos32((int)m_vSpinValue[0].z);
 
-    if (nullptr != m_pObj)
+    if (!m_vecSelectedObj.empty())
+    {
+        for (auto& obj : m_vecSelectedObj)
+        {
+            if (obj)
+            {
+                obj->m_tInfo.vPos.z = m_vSpinValue[0].z;
+            }
+        }
+    }
+    else if (nullptr != m_pObj)
     {
         m_pObj->Set_Position_bySpin(D3DXVECTOR3(m_vSpinValue[0].x, m_vSpinValue[0].y, m_vSpinValue[0].z));
     }
@@ -359,11 +791,14 @@ void CTransformInfo::OnEnChangeEdit5()  // Position Z
 
 void CTransformInfo::OnEnChangeEdit6()  // Rotation X
 {
-    if (!UpdateData(TRUE))
-        return;
-
     CString strValue;
     GetDlgItem(IDC_EDIT6)->GetWindowText(strValue);
+    if (!m_vecSelectedObj.empty() && strValue == "-")
+        return;
+    if (!UpdateData(TRUE))
+        return;
+    if (!m_pObj && m_vecSelectedObj.empty())
+        return;
 
     for (int i = 0; i < strValue.GetLength(); i++)
     {
@@ -378,7 +813,17 @@ void CTransformInfo::OnEnChangeEdit6()  // Rotation X
 
     m_SpinCtrl[3].SetPos32((int)m_vSpinValue[1].x);
 
-    if (nullptr != m_pObj)
+    if (!m_vecSelectedObj.empty())
+    {
+        for (auto& obj : m_vecSelectedObj)
+        {
+            if (obj)
+            {
+                obj->m_tInfo.vRot.x = m_vSpinValue[1].x;
+            }
+        }
+    }
+    else if (nullptr != m_pObj)
     {
         m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
     }
@@ -387,11 +832,14 @@ void CTransformInfo::OnEnChangeEdit6()  // Rotation X
 
 void CTransformInfo::OnEnChangeEdit7()  // Rotation Y
 {
-    if (!UpdateData(TRUE))
-        return;
-
     CString strValue;
     GetDlgItem(IDC_EDIT7)->GetWindowText(strValue);
+    if (!m_vecSelectedObj.empty() && strValue == "-")
+        return;
+    if (!UpdateData(TRUE))
+        return;
+    if (!m_pObj && m_vecSelectedObj.empty())
+        return;
 
     for (int i = 0; i < strValue.GetLength(); i++)
     {
@@ -406,7 +854,17 @@ void CTransformInfo::OnEnChangeEdit7()  // Rotation Y
 
     m_SpinCtrl[4].SetPos32((int)m_vSpinValue[1].y);
 
-    if (nullptr != m_pObj)
+    if (!m_vecSelectedObj.empty())
+    {
+        for (auto& obj : m_vecSelectedObj)
+        {
+            if (obj)
+            {
+                obj->m_tInfo.vRot.y = m_vSpinValue[1].y;
+            }
+        }
+    }
+    else if (nullptr != m_pObj)
     {
         m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
     }
@@ -415,11 +873,14 @@ void CTransformInfo::OnEnChangeEdit7()  // Rotation Y
 
 void CTransformInfo::OnEnChangeEdit8()  // Rotation Z
 {
-    if (!UpdateData(TRUE))
-        return;
-
     CString strValue;
     GetDlgItem(IDC_EDIT8)->GetWindowText(strValue);
+    if (!m_vecSelectedObj.empty() && strValue == "-")
+        return;
+    if (!UpdateData(TRUE))
+        return;
+    if (!m_pObj && m_vecSelectedObj.empty())
+        return;
 
     for (int i = 0; i < strValue.GetLength(); i++)
     {
@@ -434,7 +895,17 @@ void CTransformInfo::OnEnChangeEdit8()  // Rotation Z
 
     m_SpinCtrl[5].SetPos32((int)m_vSpinValue[1].z);
 
-    if (nullptr != m_pObj)
+    if (!m_vecSelectedObj.empty())
+    {
+        for (auto& obj : m_vecSelectedObj)
+        {
+            if (obj)
+            {
+                obj->m_tInfo.vRot.z = m_vSpinValue[1].z;
+            }
+        }
+    }
+    else if (nullptr != m_pObj)
     {
         m_pObj->Set_Rotation_bySpin(D3DXVECTOR3(m_vSpinValue[1].x, m_vSpinValue[1].y, m_vSpinValue[1].z));
     }
@@ -443,12 +914,14 @@ void CTransformInfo::OnEnChangeEdit8()  // Rotation Z
 
 void CTransformInfo::OnEnChangeEdit9()  // Scale X
 {
-    if (!UpdateData(TRUE))
-        return;
-
     CString strValue;
     GetDlgItem(IDC_EDIT9)->GetWindowText(strValue);
-
+    if (!m_vecSelectedObj.empty() && strValue == "-")
+        return;
+    if (!UpdateData(TRUE))
+        return;
+    if (!m_pObj && m_vecSelectedObj.empty())
+        return;
     for (int i = 0; i < strValue.GetLength(); i++)
     {
         if (i == 0 && strValue[i] == '-') continue;
@@ -462,7 +935,17 @@ void CTransformInfo::OnEnChangeEdit9()  // Scale X
 
     m_SpinCtrl[6].SetPos32((int)m_vSpinValue[2].x);
 
-    if (nullptr != m_pObj)
+    if (!m_vecSelectedObj.empty())
+    {
+        for (auto& obj : m_vecSelectedObj)
+        {
+            if (obj)
+            {
+                obj->m_tInfo.vSize.x = m_vSpinValue[2].x;
+            }
+        }
+    }
+    else if (nullptr != m_pObj)
     {
         m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
     }
@@ -471,12 +954,14 @@ void CTransformInfo::OnEnChangeEdit9()  // Scale X
 
 void CTransformInfo::OnEnChangeEdit10()  // Scale Y
 {
-    if (!UpdateData(TRUE))
-        return;
-
     CString strValue;
     GetDlgItem(IDC_EDIT10)->GetWindowText(strValue);
-
+    if (!m_vecSelectedObj.empty() && strValue == "-")
+        return;
+    if (!UpdateData(TRUE))
+        return;
+    if (!m_pObj && m_vecSelectedObj.empty())
+        return;
     for (int i = 0; i < strValue.GetLength(); i++)
     {
         if (i == 0 && strValue[i] == '-') continue;
@@ -490,7 +975,17 @@ void CTransformInfo::OnEnChangeEdit10()  // Scale Y
 
     m_SpinCtrl[7].SetPos32((int)m_vSpinValue[2].y);
 
-    if (nullptr != m_pObj)
+    if (!m_vecSelectedObj.empty())
+    {
+        for (auto& obj : m_vecSelectedObj)
+        {
+            if (obj)
+            {
+                obj->m_tInfo.vSize.y = m_vSpinValue[2].y;
+            }
+        }
+    }
+    else if (nullptr != m_pObj)
     {
         m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
     }
@@ -499,12 +994,14 @@ void CTransformInfo::OnEnChangeEdit10()  // Scale Y
 
 void CTransformInfo::OnEnChangeEdit11()  // Scale Z
 {
-    if (!UpdateData(TRUE))
-        return;
-
     CString strValue;
     GetDlgItem(IDC_EDIT11)->GetWindowText(strValue);
-
+    if (!m_vecSelectedObj.empty() && strValue == "-")
+        return;
+    if (!UpdateData(TRUE))
+        return;
+    if (!m_pObj && m_vecSelectedObj.empty())
+        return;
     for (int i = 0; i < strValue.GetLength(); i++)
     {
         if (i == 0 && strValue[i] == '-') continue;
@@ -518,7 +1015,17 @@ void CTransformInfo::OnEnChangeEdit11()  // Scale Z
 
     m_SpinCtrl[8].SetPos32((int)m_vSpinValue[2].z);
 
-    if (nullptr != m_pObj)
+    if (!m_vecSelectedObj.empty())
+    {
+        for (auto& obj : m_vecSelectedObj)
+        {
+            if (obj)
+            {
+                obj->m_tInfo.vSize.z = m_vSpinValue[2].z;
+            }
+        }
+    }
+    else if (nullptr != m_pObj)
     {
         m_pObj->Set_Scale_bySpin(D3DXVECTOR3(m_vSpinValue[2].x, m_vSpinValue[2].y, m_vSpinValue[2].z));
     }
