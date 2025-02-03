@@ -1,9 +1,7 @@
 
 #include "pch.h"
 #include "CObj.h"
-
-CObj::CObj() : m_pTerrain(nullptr), m_AnimeTime(0), m_bIsSet(false), m_pMainView(nullptr), m_strStateKey(L""), m_strObjKey(L""),
-m_fAngle(0.f), m_fScale(0.f)
+CObj::CObj() : m_pTerrain(nullptr), m_AnimeTime(0), m_bIsSet(false), m_pMainView(nullptr), m_strStateKey(L""), m_strObjKey(L""),fCameraZoom(1.f)
 {
 	ZeroMemory(&m_tInfo, sizeof(INFO));
 	ZeroMemory(&m_tFrame, sizeof(FRAME));
@@ -219,7 +217,7 @@ void CObj::Set_WallSprite(const wstring& strStateKey, const wstring& strObjKey, 
 {
 	m_strStateKey = strStateKey;
 	m_strObjKey = strObjKey;
-	m_tFrame.fFrame = iIndex;
+	m_tFrame.fFrame = (float)iIndex;
 }
 
 void CObj::Serialize(CArchive& ar)

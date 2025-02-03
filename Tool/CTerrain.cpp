@@ -81,16 +81,21 @@ void CTerrain::Initialize()
 	}
 
 
-	//CBSPMap bspMap;
-	//int mapWidth = static_cast<int>(8000 / TILECX);
-	//int mapHeight = static_cast<int>(6000 / TILECY);
-	//bspMap.Generate_Room(mapWidth, mapHeight,2);
-	//m_vecLine = bspMap.Get_Terrain_Grid();
+	CBSPMap bspMap;
+	int mapWidth = static_cast<int>(8000 / TILECX);
+	int mapHeight = static_cast<int>(6000 / TILECY);
+	bspMap.Generate_Room(mapWidth, mapHeight,2);
+	m_vecLine = bspMap.Get_Terrain_Grid();
 }
 
 void CTerrain::Update()
 {
+	if (CKeyManager::Get_Instance()->Key_Pressing('R'))
+	{
+		CBSPMap bspMap;
 	
+		m_vecLine = bspMap.Get_Terrain_Grid();
+	}
 
 }
 
@@ -325,6 +330,15 @@ void CTerrain::OnLButtonUp()
 	{
 		m_bIsPicking = false;
 	}
+}
+
+void CTerrain::Generate_Grid(int width, int height, int minRoomSize)
+{
+	CBSPMap bspMap;
+	int mapWidth = static_cast<int>(width / TILECX);
+	int mapHeight = static_cast<int>(height / TILECY);
+	bspMap.Generate_Room(mapWidth, mapHeight, minRoomSize);
+	m_vecLine = bspMap.Get_Terrain_Grid();
 }
 
 void CTerrain::Render_Current_Draw_Tile()

@@ -13,7 +13,11 @@ public:
 	CObj();
 	~CObj();
 	CObj(const CObj&& other) noexcept
-		: m_pTerrain(other.m_pTerrain), m_AnimeTime(other.m_AnimeTime), m_bIsSet(other.m_bIsSet), m_pMainView(other.m_pMainView), m_strStateKey(other.m_strStateKey), m_strObjKey(other.m_strObjKey)
+		: m_pTerrain(other.m_pTerrain), 
+		m_AnimeTime(other.m_AnimeTime), 
+		m_bIsSet(other.m_bIsSet), m_pMainView(other.m_pMainView),
+		m_strStateKey(other.m_strStateKey),
+		m_strObjKey(other.m_strObjKey)
 	{
 		m_tInfo = other.m_tInfo;
 		m_tFrame = other.m_tFrame;
@@ -85,12 +89,10 @@ public:
 	wstring m_strStateKey;
 	wstring m_strObjKey;
 	bool m_bIsSet;
-	float fCameraZoom = 1.0f;  // 줌 레벨 (1.0이 기본)
+	float fCameraZoom;
 	D3DXVECTOR2 vCameraOffset;
 	CToolView* m_pMainView;
 	INFO	m_tInfo;
-	float	m_fAngle;
-	float	m_fScale;
 	FRAME   m_tFrame;
 	DWORD	m_AnimeTime;
 
@@ -99,7 +101,4 @@ public:
 	D3DXMATRIX m_matScale;
 	D3DXMATRIX m_matRot;
 	D3DXMATRIX m_matTrans;
-
-private:
-
 };

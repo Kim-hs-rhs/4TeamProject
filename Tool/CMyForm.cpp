@@ -54,6 +54,9 @@ void CMyForm::DoDataExchange(CDataExchange* pDX)
 	CFormView::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST1, m_TextureListBox);
 	DDX_Control(pDX, IDC_STATIC_IMAGE, m_TextrueImage);
+	DDX_Text(pDX, IDC_EDIT1, m_arrGridAttri[0]);
+	DDX_Text(pDX, IDC_EDIT2, m_arrGridAttri[1]);
+	DDX_Text(pDX, IDC_EDIT12, m_arrGridAttri[2]);
 }
 
 
@@ -64,6 +67,10 @@ BEGIN_MESSAGE_MAP(CMyForm, CFormView)
 	ON_BN_CLICKED(IDC_BUTTON3, &CMyForm::OnBnClickedButton3)
 	ON_BN_CLICKED(IDC_BUTTON4, &CMyForm::OnBnClickedButton4)
 	ON_BN_CLICKED(IDC_CHECK1, &CMyForm::OnBnClickedCheck1)
+	ON_EN_CHANGE(IDC_EDIT1, &CMyForm::OnSetWidth)
+	ON_EN_CHANGE(IDC_EDIT2, &CMyForm::OnSetHeight)
+	ON_BN_CLICKED(IDC_BUTTON1, &CMyForm::OnBnGridGenerate)
+	ON_EN_CHANGE(IDC_EDIT12, &CMyForm::OnSetMinRoomSize)
 END_MESSAGE_MAP()
 
 
@@ -92,6 +99,7 @@ void CMyForm::OnInitialUpdate()
 	CFormView::OnInitialUpdate();
 	SetScrollSizes(MM_TEXT, CSize(0, 0)); // 스크롤 없애기
 	((CButton*)GetDlgItem(IDC_CHECK1))->SetCheck(1);
+	ZeroMemory(&m_arrGridAttri, sizeof(m_arrGridAttri));
 	//m_TextureListBox.Load_TextureList();
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 }
@@ -161,9 +169,9 @@ void CMyForm::OnBnClickedButton3()
 	CFileDialog dig(FALSE, L"dat", L"*.dat", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
 		L"Data Files(*.dat) | *.dat ||", this);
 	CString strPath;
-	GetCurrentDirectory(256,strPath.GetBuffer(256));
+	GetCurrentDirectory(MAX_PATH,strPath.GetBuffer(MAX_PATH));
 	strPath.ReleaseBuffer();
-	PathRemoveFileSpec(strPath.GetBuffer(256));
+	PathRemoveFileSpec(strPath.GetBuffer(MAX_PATH));
 	strPath.ReleaseBuffer();
 	strPath += L"\\Data";
 	dig.m_ofn.lpstrInitialDir = strPath;
@@ -192,9 +200,9 @@ void CMyForm::OnBnClickedButton4()
 	CFileDialog dig(TRUE, L"dat", L"*.dat", OFN_HIDEREADONLY | OFN_FILEMUSTEXIST,
 		L"Data Files(*.dat) | *.dat ||", this);
 	CString strPath;
-	GetCurrentDirectory(256, strPath.GetBuffer(256));
+	GetCurrentDirectory(MAX_PATH, strPath.GetBuffer(MAX_PATH));
 	strPath.ReleaseBuffer();
-	PathRemoveFileSpec(strPath.GetBuffer(256));
+	PathRemoveFileSpec(strPath.GetBuffer(MAX_PATH));
 	strPath.ReleaseBuffer();
 	strPath += L"\\Data";
 	dig.m_ofn.lpstrInitialDir = strPath;
@@ -225,7 +233,7 @@ void CMyForm::SaveTileData(vector<TILE>& vecTile, const CString& strFolderPath, 
 
 	// 전체 경로 생성
 	CString strFullPath;
-	strFullPath.Format(_T("%s\\%s"), strFolderPath, strFileName);
+	strFullPath.Format(_T("%s\\%s"), (LPCWSTR)strFolderPath, (LPCWSTR)strFileName);
 
 	CFile File;
 	if (!File.Open(strFullPath, CFile::modeCreate | CFile::modeWrite))
@@ -244,7 +252,7 @@ void CMyForm::SaveTileData(vector<TILE>& vecTile, const CString& strFolderPath, 
 	Ar.Close();
 	File.Close();
 	CString strSuccess;
-	strSuccess.Format(_T("파일이 성공적으로 저장되었습니다.\n저장 경로: %s"), strFullPath);
+	strSuccess.Format(_T("파일이 성공적으로 저장되었습니다.\n저장 경로: %s"), (LPCWSTR)strFullPath);
 	MessageBox(strSuccess, _T("저장 완료"), MB_ICONINFORMATION);
 }
 
@@ -252,7 +260,7 @@ void CMyForm::LoadTileData(vector<TILE>& vecTile, const CString& strFolderPath, 
 {
 	// 전체 경로 생성
 	CString strFullPath;
-	strFullPath.Format(_T("%s\\%s"), strFolderPath, strFileName);
+	strFullPath.Format(_T("%s\\%s"), (LPCWSTR)strFolderPath, (LPCWSTR)strFileName);
 
 	// 폴더 경로 확인
 	if (!PathFileExists(strFolderPath))
@@ -285,7 +293,7 @@ void CMyForm::LoadTileData(vector<TILE>& vecTile, const CString& strFolderPath, 
 	File.Close();
 
 	CString strSuccess;
-	strSuccess.Format(_T("파일을 성공적으로 불러왔습니다.\n파일 경로: %s"), strFullPath);
+	strSuccess.Format(_T("파일을 성공적으로 불러왔습니다.\n파일 경로: %s"), (LPCWSTR)strFullPath);
 	MessageBox(strSuccess, _T("로드 완료"), MB_ICONINFORMATION);
 }
 
@@ -302,7 +310,7 @@ void CMyForm::SaveMapData(vector<TILE>& vecTile, vector<CObj*>& vecObj, const CS
 
 	// 전체 경로 생성
 	CString strFullPath;
-	strFullPath.Format(_T("%s\\%s"), strFolderPath, strFileName);
+	strFullPath.Format(_T("%s\\%s"), (LPCWSTR)strFolderPath, (LPCWSTR)strFileName);
 
 	CFile File;
 	if (!File.Open(strFullPath, CFile::modeCreate | CFile::modeWrite))
@@ -334,14 +342,14 @@ void CMyForm::SaveMapData(vector<TILE>& vecTile, vector<CObj*>& vecObj, const CS
 	File.Close();
 
 	CString strSuccess;
-	strSuccess.Format(_T("맵 데이터가 성공적으로 저장되었습니다.\n저장 경로: %s"), strFullPath);
+	strSuccess.Format(_T("맵 데이터가 성공적으로 저장되었습니다.\n저장 경로: %s"), (LPCWSTR)strFullPath);
 	MessageBox(strSuccess, _T("저장 완료"), MB_ICONINFORMATION);
 }
 
 void CMyForm::LoadMapData(vector<TILE>& vecTile, vector<CObj*>& vecObj, const CString& strFolderPath, const CString& strFileName)
 {
 	CString strFullPath;
-	strFullPath.Format(_T("%s\\%s"), strFolderPath, strFileName);
+	strFullPath.Format(_T("%s\\%s"), (LPCWSTR)strFolderPath, (LPCWSTR)strFileName);
 
 	// 폴더 경로 확인
 	if (!PathFileExists(strFolderPath))
@@ -400,7 +408,7 @@ void CMyForm::LoadMapData(vector<TILE>& vecTile, vector<CObj*>& vecObj, const CS
 	File.Close();
 
 	CString strSuccess;
-	strSuccess.Format(_T("맵 데이터를 성공적으로 불러왔습니다.\n파일 경로: %s"), strFullPath);
+	strSuccess.Format(_T("맵 데이터를 성공적으로 불러왔습니다.\n파일 경로: %s"), (LPCWSTR)strFullPath);
 	MessageBox(strSuccess, _T("로드 완료"), MB_ICONINFORMATION);
 }
 
@@ -413,3 +421,86 @@ void CMyForm::OnBnClickedCheck1()
 	CTerrain* pTerrain = pView->m_pTerrain;
 	pTerrain->m_bOnGrid = !pTerrain->m_bOnGrid;
 }
+
+
+void CMyForm::OnSetWidth()
+{
+	if (!UpdateData(TRUE))
+		return;
+
+	CString strValue;
+	GetDlgItem(IDC_EDIT1)->GetWindowText(strValue);
+
+	for (int i = 0; i < strValue.GetLength(); i++)
+	{
+		if (i == 0 && strValue[i] == '-') continue;
+		if (!isdigit(strValue[i]))
+		{
+
+		
+			return;
+		}
+	}
+
+	m_arrGridAttri[0] = _ttoi(strValue);
+	UpdateData(FALSE);
+}
+
+
+void CMyForm::OnSetHeight()
+{
+	if (!UpdateData(TRUE))
+		return;
+
+	CString strValue;
+	GetDlgItem(IDC_EDIT2)->GetWindowText(strValue);
+
+	for (int i = 0; i < strValue.GetLength(); i++)
+	{
+		if (i == 0 && strValue[i] == '-') continue;
+		if (!isdigit(strValue[i]))
+		{
+
+		
+			return;
+		}
+	}
+	m_arrGridAttri[1] = _ttoi(strValue);
+	UpdateData(FALSE);
+}
+
+void CMyForm::OnSetMinRoomSize()
+{
+	if (!UpdateData(TRUE))
+		return;
+
+	CString strValue;
+	GetDlgItem(IDC_EDIT12)->GetWindowText(strValue);
+
+	for (int i = 0; i < strValue.GetLength(); i++)
+	{
+		if (i == 0 && strValue[i] == '-') continue;
+		if (!isdigit(strValue[i]))
+		{
+			return;
+		}
+	}
+	m_arrGridAttri[2] = _ttoi(strValue);
+	UpdateData(FALSE);
+}
+
+
+void CMyForm::OnBnGridGenerate()
+{
+	CMainFrame* pMainFrm = (CMainFrame*)AfxGetMainWnd();
+	CToolView* pView = dynamic_cast<CToolView*>(pMainFrm->m_ThirdSplitter.GetPane(0, 0));
+
+	CTerrain* pTerrain = pView->m_pTerrain;
+
+	if (pTerrain)
+	{
+		pTerrain->Generate_Grid(m_arrGridAttri[0], m_arrGridAttri[1], m_arrGridAttri[2]);
+	}
+}
+
+
