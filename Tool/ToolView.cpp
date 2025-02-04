@@ -68,7 +68,7 @@ CToolView::~CToolView()
 void CToolView::OnInitialUpdate()
 {
 	CView::OnInitialUpdate();
-	ConsoleWindow::Create();
+	//ConsoleWindow::Create();
 	srand((unsigned int)time(NULL));
 	m_nTimer = SetTimer(1, 16, NULL);
 	// AfxGetMainWnd : 현재 메인 윈도우의 값을 반환하는 전역함수
@@ -273,7 +273,7 @@ void CToolView::OnDestroy()
 {
 	KillTimer(m_nTimer);
 	CView::OnDestroy();
-	ConsoleWindow::Destroy();
+	//ConsoleWindow::Destroy();
 	Safe_Delete(m_pObj);
 	CObjManager::Destroy_Instance();
 	CKeyManager::Destroy_Instance();
@@ -281,7 +281,6 @@ void CToolView::OnDestroy()
 	CTextureMgr::Destroy_Instance();
 	CUndoManager::Destroy_Instance();
 	m_pDevice->Destroy_Instance();
-
 }
 
 

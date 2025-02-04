@@ -8,6 +8,13 @@ const vector<array<D3DXVECTOR2, 5>> CBSPMap::Get_Terrain_Grid()
 	vector<array<D3DXVECTOR2, 5>> vecLines;
 
 	set<pair<int,int>> setLinesPos;
+
+    sort(m_vecRoom.begin(), m_vecRoom.end(), [&](Room* r1, Room* r2)
+        {
+            if (r1->y != r2->y) return r1->y < r2->y;
+            return r1->x < r2->x;
+        });
+
 	// 각 방과 복도에 대해 다이아몬드 형태의 라인 생성
 	for (const auto& pRoom : m_vecRoom)
 	{
